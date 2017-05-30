@@ -22,3 +22,5 @@ INPUT_PINS = {
     "E": "Edge",
     "D": "Bell"
 }
+
+SENTINEL_INSTRUMENT_HEADER = b"instH\x00\x00\x00"

@@ -44,8 +44,10 @@ class StrikeKit(object):
         raw_instruments = data[inst_begin:inst_end]
         raw_sampledata = data[inst_end:]
 
-        self._parse_instruments(raw_instruments)
+        # Samples have to be parsed before instruments so we know who uses what.
         self._parse_samples(raw_sampledata)
+        self._parse_instruments(raw_instruments)
+        
 
 
     def _parse_samples(self, data):
@@ -58,7 +60,7 @@ class StrikeKit(object):
             start_index = x * constants.INSTRUMENT_SIZE
             end_index = start_index + constants.INSTRUMENT_SIZE
             raw_instrument = data[start_index:end_index]
-            instrument = StrikeInstrument(raw_data=raw_instrument)
+            instrument = StrikeInstrument(raw_data=raw_instrument, samples=self.samples)
             result.append(instrument)
         self._instruments = result
 
@@ -67,75 +69,79 @@ class StrikeInstrument(object):
         Instrument section
         80 bytes
 
-    offset      13 (that's weird) byte header
-                ------------------
-    0           4 byte 0x696e7374       - Begin "inst" header
-    4           1 byte 0x48             - "H" ???
-    5           3 byte 0x00             - Padding
-    8           3 byte trigger spec     - (K|S|T|H|C|R)([1-4])(H|R|F|B|E|D)
-                                            Kick/Snare/Tom/Hat/Crash/Ride
-                                            1-4 for Toms, 1-3 Crash, 1 everything else
-                                            Head/Rim for pads
-                                            Foot/Edge/Bow for Hat
-                                            Edge/Bow for Crashes
-                                            D/B/E for Rides, not sure which is bow and bell
-    -- LAYER A DATA
-    11          1 byte                  - 0x20 (SPC) terminator ?
-    12          1 byte sample ref       - offset of sample as listed in sample section?
-    13          1 byte                  - 0x00 padding?
-    14          1 byte level            - 0x00 to 0x63
-    15          1 byte pan              - this is fun. Values > 128 are panned left. 255 - pan. Values < 128 are panned right.
-    16          1 byte decay            - 0x00 to 0x63
-    17          2 byte pad?             - 0x00
-    19          1 byte Tune             - 0-12 = +, 243-255 = -
-    20          1 byte fine             - 0-127 positive, 255-* negative
-    21          1 byte cutoff           - 0-127 positive, 255-* negative
-    22          1 byte ?                - 
-    23          1 byte ?                - 
-    24          1 byte vel decay        -
-    25          1 byte vel filter       -
-    26          1 byte vel level        - 
-    27          1 byte vel pitch        -     
-    28          1 byte vel filtertype   - 0 lo, 1 hi
+        offset      12 (that's weird) byte header
+                    ------------------
+        0           4 byte 0x696e7374       - Begin "inst" header
+        4           1 byte 0x48             - "H" ???
+        5           3 byte 0x00             - Padding
+        8           3 byte trigger spec     - (K|S|T|H|C|R)([1-4])(H|R|F|B|E|D)
+                                                Kick/Snare/Tom/Hat/Crash/Ride
+                                                1-4 for Toms, 1-3 Crash, 1 everything else
+                                                Head/Rim for pads
+                                                Foot/Edge/Bow for Hat
+                                                Edge/Bow for Crashes
+                                                D/B/E for Rides, not sure which is bow and bell    
+        11          1 byte                  - 0x20 (SPC) terminator ?     FF if not set    
+            
+        -- LAYER A DATA
+        12          1 byte sample ref       - offset of sample as listed in sample section? FF if not set
+        13          1 byte                  - 0x00 padding?
+        14          1 byte level            - 0x00 to 0x63
+        15          1 byte pan              - this is fun. Values > 128 are panned left. 255 - pan. Values < 128 are panned right.
+        16          1 byte decay            - 0x00 to 0x63
+        17          2 byte pad?             - 0x002
+        19          1 byte Tune             - 0-12 = +, 243-255 = -
+        20          1 byte fine             - 0-127 positive, 255-* negative
+        21          1 byte cutoff           - 0-127 positive, 255-* negative
+        22          1 byte vel filtertype   - 0 lo, 1 hi
+        23          1 byte vel decay        - 
+        24          1 byte vel pitch        - 
+        25          1 byte vel filter       -
+        26          1 byte vel level        - 
+        27          1 byte 0 pad
+        28          1 byte 7f terminator?
+        29          3 byte 0 pad
+        -- LAYER B DATA
+        32          1 byte sample ref       - offset of sample as listed in sample section? FF if not set
+        33          1 byte                  - 0x00 padding?
+        34          1 byte level            - 0x00 to 0x63
+        34          1 byte pan              - this is fun. Values > 128 are panned left. 255 - pan. Values < 128 are panned right.
+        35          1 byte decay            - 0x00 to 0x63
+        36          2 byte pad?             - 0x00
+        38          1 byte Tune             - 0-12 = +, 243-255 = -
+        39          1 byte fine             - 0-127 positive, 255-* negative
+        40          1 byte cutoff           - 0-127 positive, 255-* negative
+        41          1 byte vel filtertype   - 0 lo, 1 hi
+        42          1 byte vel decay        - 
+        43          1 byte vel pitch        - 
+        44          1 byte vel filter       -
+        45          1 byte vel level        - 
+        46          1 byte 0 pad
+        47          1 byte 7f terminator?
+        48          3 byte 0 pad
 
-    -- LAYER B DATA
-    32          1 byte                  - 0x20 (SPC) terminator ?
-    33         1 byte sample ref       - offset of sample as listed in sample section?
-    34          1 byte                  - 0x00 padding?
-    35          1 byte level            - 0x00 to 0x63
-    36          1 byte pan              - this is fun. Values > 128 are panned left. 255 - pan. Values < 128 are panned right.
-    37          1 byte decay            - 0x00 to 0x63
-    38          2 byte pad?             - 0x00
-    40          1 byte Tune             - 0-12 = +, 243-255 = -
-    40          1 byte fine             - 0-127 positive, 255-* negative
-    42          1 byte cutoff           - 0-127 positive, 255-* negative
-    43          1 byte vel filtertype   - 0 lo, 1 hi
-    44          1 byte vel decay        - 
-    45          1 byte vel pitch        - 
-    46          1 byte vel filter       -
-    47          1 byte vel level        - 
-    48          1 byte 0 pad
-    49          1 byte 7f terminator?
-    50          3 byte 0 pad
 
-    -- VOICE DATA (MIDI, sends, etc)
-    53          1 byte reverb send
-    54          1 byte FX send
-    55          2 byte 0 pad? 
-    57          1 byte (Note off or Priority? need to investigate)
-    58          1 byte mute group
-    59          1 byte playback?
-    60          1 byte MIDI chan
-    61          1 byte MIDI note
-    62          1 byte gate time
-    63          1 byte note off?
-    64          1 byte 0 pad?
-    65          5 byte FF terminator
-    70          11 byte zero pad?
-    """
-    def __init__(self, *args, **kwargs):
-        raw_data = kwargs.get("raw_data")
+        -- VOICE DATA (MIDI, sends, etc)
+        51          1 byte reverb send
+        52          1 byte FX send
+        53          2 byte 0 pad? 
+        55          1 byte (Note off or Priority? need to investigate)
+        56          1 byte mute group
+        57          1 byte playback?
+        58          1 byte MIDI chan
+        59          1 byte MIDI note
+        60          1 byte gate time
+        61          1 byte note off?
+        62          1 byte 0 pad?
+        63          5 byte FF terminator
+        68         11 byte zero pad?
+        """
 
+    
+    
+    
+    #
+    def __init__(self, raw_data=None, *args, **kwargs):
         if raw_data:
             self._parse(raw_data)
 
@@ -148,10 +154,9 @@ class StrikeInstrument(object):
         # throwaway data.
         inst_header = raw_header[0:8]
         # but make sure it's the right throwaway data.
-        assert inst_header == b"instH\x00\x00\x00"
+        assert inst_header == constants.SENTINEL_INSTRUMENT_HEADER
         self._trigger_spec = StrikeInstrumentTriggerSpec(raw_header[8:11])
         raw_layers = data[constants.INSTRUMENT_HEADER_SIZE:constants.INSTRUMENT_HEADER_SIZE+constants.INSTRUMENT_LAYER_SIZE*2]
-        len(raw_layers)
         assert len(raw_layers) == constants.INSTRUMENT_LAYER_SIZE*2
         self.layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:constants.INSTRUMENT_LAYER_SIZE])
         self.layer_b = StrikeInstrumentLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:])
@@ -184,7 +189,7 @@ class StrikeInstrumentLayer(object):
     def _parse(self, data):
         # 0-47 if there's a sample. FF if not
         # import pdb; pdb.set_trace()
-        self.sample_index = helpers.parse_signed_byte(data[0])
+        self._sample_index = helpers.parse_signed_byte(data[0])
         # mystery pad byte.
         byte2 = data[1]
         self.lvl_level = helpers.parse_signed_byte(data[2])
@@ -237,6 +242,9 @@ class StrikeSamples(object):
     @property
     def sample_table(self):
         return self._sample_table
+
+    def get_sample_by_index(self, index):
+        return self._sample_table[index]
 
     def _parse(self, data):
         """
