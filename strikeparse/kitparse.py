@@ -2,9 +2,13 @@ from . import helpers
 
 kit_file = "layerb.skt"
 
-header_size = 52
+kit_header_size = 52
 instrument_size = 80
 instrument_count = 24
+instrument_header_size = 12
+instrument_layer_size = 20
+instrument_voice_size = 28
+
 
 class StrikeKit(object):
     """
@@ -39,9 +43,15 @@ class StrikeKit(object):
         return self._kit_settings
 
     def _parse_raw_kit(self, data):
+        raw_header = data[0:kit_header_size]
+        inst_begin = kit_header_size
+        inst_end = kit_header_size + (instrument_count * instrument_size)
+        raw_instruments = data[inst_begin:inst_end]
+        raw_sampledata = data[inst_end + 1:]
+
         self._kit_settings = self._parse_kit_settings(data)
         self._parse_instruments(data)
-        pass
+
 
     def _parse_kit_settings(self, data):
         # header
@@ -65,18 +75,88 @@ class StrikeKit(object):
         result = []
         instraw_length = instrument_size * instrument_count
         # offset the header.
-        inst_offset = instraw_length + header_size
+        inst_offset = instraw_length + kit_header_size
         # get the slice header:(instcount * instsize)
-        instrument_data = data[header_size:inst_offset]
+        instrument_data = data[kit_header_size:inst_offset]
         for x in range(0, instrument_count):
             start_index = x * instrument_size
             end_index = start_index + instrument_size
-            instrument = instrument_data[start_index:end_index]
+            raw_instrument = instrument_data[start_index:end_index]
+            instrument = StrikeInstrument(raw_data=raw_instrument)
             result.append(instrument)
         self._instruments = result
 
 class StrikeInstrument(object):
-    pass
+    def __init__(self, *args, **kwargs):
+        raw_data = kwargs.get("raw_data")
+
+        if raw_data:
+            self._parse(raw_data)
+
+    def _parse(self, data):
+        raw_header = data[0:instrument_header_size]
+        inst_header = raw_header[0:8]
+        # TODO(parse trigger ID)
+        trig_id = raw_header[8:11]
+        raw_layers = data[instrument_header_size:instrument_layer_size*2]
+        self.layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:instrument_layer_size])
+        self.layer_b = StrikeInstrumentLayer(raw_data=raw_layers[instrument_layer_size:])
+        raw_voice = data[52:]
+        self.instrument_settings = StrikeInstrumentSettings(raw_data=raw_voice)
+
+
+class StrikeInstrumentLayer(object):
+    def __init__(self, *args, **kwargs):
+        raw_data = kwargs.get("raw_data")
+
+        if raw_data:
+            self._parse(raw_data)
+
+    def _parse(self, data):
+        # 0-47 if there's a sample. FF if not
+        self.sample_index = helpers.parse_signed_byte(data[0])
+        # mystery pad byte.
+        byte2 = data[1]
+        self.lvl_level = helpers.parse_signed_byte(data[2])
+        self.lvl_pan = helpers.parse_signed_byte(data[3])
+        self.lvl_decay = helpers.parse_signed_byte(data[4])
+        pad0 = data[5:8]
+        self.tone_tune = helpers.parse_signed_byte(data[8])
+        self.tone_fine = helpers.parse_signed_byte(data[9])
+        self.tone_cutoff = helpers.parse_signed_byte(data[10])
+        # TODO(future)  - parse filtertype
+        self.vel_filtertype = helpers.parse_signed_byte(data[11])
+        self.vel_decay = helpers.parse_signed_byte(data[12])
+        self.vel_pitch = helpers.parse_signed_byte(data[13])
+        self.vel_filter = helpers.parse_signed_byte(data[14])
+        self.vel_level = helpers.parse_signed_byte(data[15])
+        self.pad1 = data[16]
+        self.term_pad = data[17:20]
+
+class StrikeInstrumentSettings(object):
+    def __init__(self, *args, **kwargs):
+        raw_data = kwargs.get("raw_data")
+
+        if raw_data:
+            self._parse(raw_data)
+
+    def _parse(self, data):
+        self.send_reverb = helpers.parse_signed_byte(data[0])
+        self.send_fx =  helpers.parse_signed_byte(data[1])
+        pad0 = data[2:4]
+        self.priority =  helpers.parse_signed_byte(data[4])
+        # TODO(parse mutegroup)
+        self.mutegroup =  helpers.parse_signed_byte(data[5])
+        # TODO(parse playback)
+        self.playback =  helpers.parse_signed_byte(data[6])
+        self.midi_channel = helpers.parse_signed_byte(data[7])
+        self.midi_note =  helpers.parse_signed_byte(data[8])
+        self.midi_gate = helpers.parse_signed_byte(data[7])
+        # TODO(parse note off)
+        self.midi_noteoff = helpers.parse_signed_byte(data[8])
+        pad1 = data[9]
+        ffterminator = data[10:15]
+        pad2 = data[15:]
 
 class StrikeSamples(object):
     pass
@@ -88,10 +168,7 @@ class KitSettings(object):
         self._reverb_size = kwargs.get("reverb_size")
         self._reverb_level = kwargs.get("reverb_level")
 
-class Parseable(object):
-    def __init__(self, raw):
-        self.parse(raw)
-
+        
     def parse(self, data):
         # Parse method is responsible for populating private vars.
         raise NotImplementedError("Abstract class method requires implementation")
@@ -107,35 +184,73 @@ def doc_func():
     Instrument section
     80 bytes
 
-    offset      13 (that's weird) byte header
+
+
+offset      13 (that's weird) byte header
             ------------------
-            4 byte 0x696e7374       - Begin "inst" header
-            1 byte 0x48             - "H" ???
-            3 byte 0x00             - Padding
-            3 byte trigger spec     - (K|S|T|H|C|R)([1-4])(H|R|F|B|E|D)
+0           4 byte 0x696e7374       - Begin "inst" header
+4           1 byte 0x48             - "H" ???
+5           3 byte 0x00             - Padding
+8           3 byte trigger spec     - (K|S|T|H|C|R)([1-4])(H|R|F|B|E|D)
                                         Kick/Snare/Tom/Hat/Crash/Ride
                                         1-4 for Toms, 1-3 Crash, 1 everything else
                                         Head/Rim for pads
                                         Foot/Edge/Bow for Hat
                                         Edge/Bow for Crashes
                                         D/B/E for Rides, not sure which is bow and bell
-            1 byte                  - 0x20 (SPC) terminator ?
-            1 byte sample ref       - offset of sample as listed in sample section?
-            1 byte                  - 0x00 padding?
-            1 byte level            - 0x00 to 0x63
-            1 byte pan              - this is fun. Values > 128 are panned left. 255 - pan. Values < 128 are panned right.
-            1 byte decay            - 0x00 to 0x63
-            2 byte pad?             - 0x00
-            1 byte Tune             - 0-12 = +, 243-255 = -
-            1 byte fine             - 0-127 positive, 255-* negative
-            1 byte cutoff           - 0-127 positive, 255-* negative
-            1 byte ?                - 
-            1 byte ?                - 
-            1 byte vel decay        -
-            1 byte vel filter       -
-            1 byte vel level        - 
-            1 byte vel pitch        - 
+-- LAYER A DATA
+11          1 byte                  - 0x20 (SPC) terminator ?
+12          1 byte sample ref       - offset of sample as listed in sample section?
+13          1 byte                  - 0x00 padding?
+14          1 byte level            - 0x00 to 0x63
+15          1 byte pan              - this is fun. Values > 128 are panned left. 255 - pan. Values < 128 are panned right.
+16          1 byte decay            - 0x00 to 0x63
+17          2 byte pad?             - 0x00
+19          1 byte Tune             - 0-12 = +, 243-255 = -
+20          1 byte fine             - 0-127 positive, 255-* negative
+21          1 byte cutoff           - 0-127 positive, 255-* negative
+22          1 byte ?                - 
+23          1 byte ?                - 
+24          1 byte vel decay        -
+25          1 byte vel filter       -
+26          1 byte vel level        - 
+27          1 byte vel pitch        -     
+28          1 byte vel filtertype   - 0 lo, 1 hi
 
+-- LAYER B DATA
+32          1 byte                  - 0x20 (SPC) terminator ?
+33         1 byte sample ref       - offset of sample as listed in sample section?
+34          1 byte                  - 0x00 padding?
+35          1 byte level            - 0x00 to 0x63
+36          1 byte pan              - this is fun. Values > 128 are panned left. 255 - pan. Values < 128 are panned right.
+37          1 byte decay            - 0x00 to 0x63
+38          2 byte pad?             - 0x00
+40          1 byte Tune             - 0-12 = +, 243-255 = -
+40          1 byte fine             - 0-127 positive, 255-* negative
+42          1 byte cutoff           - 0-127 positive, 255-* negative
+43          1 byte vel filtertype   - 0 lo, 1 hi
+44          1 byte vel decay        - 
+45          1 byte vel pitch        - 
+46          1 byte vel filter       -
+47          1 byte vel level        - 
+48          1 byte 0 pad
+49          1 byte 7f terminator?
+50          3 byte 0 pad
+
+-- VOICE DATA (MIDI, sends, etc)
+53          1 byte reverb send
+54          1 byte FX send
+55          2 byte 0 pad? 
+57          1 byte (Note off or Priority? need to investigate)
+58          1 byte mute group
+59          1 byte playback?
+60          1 byte MIDI chan
+61          1 byte MIDI note
+62          1 byte gate time
+63          1 byte note off?
+64          1 byte 0 pad?
+65          5 byte FF terminator
+70          11 byte zero pad?
 
 
     Samples section
@@ -151,6 +266,7 @@ def parse_file(filepath):
     with open(kit_file, "rb") as f:
         raw_data = f.read()
         x = StrikeKit(raw_data)
+        print(x)
         # header = f.read(header_size)
         # instruments = f.read(instrument_count * instrument_size)
         # samples = f.read()
