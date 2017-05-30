@@ -24,7 +24,8 @@ class TestStrikeKit(unittest.TestCase):
         assert self.kit.instruments is not None
     
     def test_instruments_have_trigger_specs(self):
-        specs = [x.trigger_spec for x in self.kit.instruments]
-        map(lambda x: print(str(x)), specs)
-        assert all([x for x in self.kit.instruments if x.trigger_spec is not None])
-        
+        assert not any(x for x in self.kit.instruments if x.trigger_spec is None)
+
+    def test_trigger_specs_print(self):
+        kick = list(filter(lambda x: x.input_type == "Kick", [x.trigger_spec for x in self.kit.instruments]))[0]
+        assert str(kick) == "Kick1 Head"
