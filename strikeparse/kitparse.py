@@ -9,6 +9,24 @@ instrument_header_size = 12
 instrument_layer_size = 20
 instrument_voice_size = 28
 
+INPUT_TYPES = {
+    "K": "Kick",
+    "S": "Snare",
+    "T": "Tom",
+    "C": "Crash",
+    "R": "Ride",
+    "H": "HiHat"
+}
+
+INPUT_PINS = {
+    "H": "Head",
+    "R": "Rim",
+    "F": "Foot Splash",
+    "B": "Bow",
+    "E": "Edge",
+    "D": "Bell"
+}
+
 
 class StrikeKit(object):
     """
@@ -42,6 +60,10 @@ class StrikeKit(object):
     def kit_settings(self):
         return self._kit_settings
 
+    @property
+    def instruments(self):
+        return self._instruments
+
     def _parse_raw_kit(self, data):
         raw_header = data[0:kit_header_size]
         inst_begin = kit_header_size
@@ -58,18 +80,15 @@ class StrikeKit(object):
         header_data = data[0:52]
         # KIT header
         kit_bytes = header_data[0:3]
-        print_field("KIT Header", kit_bytes)
         # No idea. 0x202c (32,44)
         field0 = header_data[3:5]
-        print_field("Pad bytes", field0)
         # Zero pad?
         pad0 = header_data[5:9]
-        print_field("Zero pad", pad0)
         # 0x0063 - no idea - kit volume?
         field0 = header_data[9:11]
         # kitfx - reverb
         kitfx_reverb = header_data[11:15]
-        print_field("Kit reverb", kitfx_reverb)
+
 
     def _parse_instruments(self, data):
         result = []
@@ -93,16 +112,34 @@ class StrikeInstrument(object):
         if raw_data:
             self._parse(raw_data)
 
+    @property
+    def trigger_spec(self):
+        return self._trigger_spec
+
     def _parse(self, data):
         raw_header = data[0:instrument_header_size]
         inst_header = raw_header[0:8]
         # TODO(parse trigger ID)
-        trig_id = raw_header[8:11]
-        raw_layers = data[instrument_header_size:instrument_layer_size*2]
+        raw_trigger_spec = raw_header[8:11]
+        self._trigger_spec = StrikeInstrumentTriggerSpec(raw_trigger_spec)
+        raw_layers = data[kit_header_size:instrument_layer_size*2]
         self.layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:instrument_layer_size])
         self.layer_b = StrikeInstrumentLayer(raw_data=raw_layers[instrument_layer_size:])
         raw_voice = data[52:]
         self.instrument_settings = StrikeInstrumentSettings(raw_data=raw_voice)
+
+class StrikeInstrumentTriggerSpec(object):
+    def __init__(self, raw_data=None, *args, **kwargs):
+        if raw_data:
+            self._parse(raw_data)
+
+    def _parse(self, data):
+        self.input_type = INPUT_TYPES.get(chr(data[0]))
+        self.input_index = chr(data[1])
+        self.input_pin = INPUT_PINS.get(chr(data[2]))
+
+    def __str__(self):
+        return "{0}{1} {2}".format(self.input_type, self.input_index, self.input_pin)
 
 
 class StrikeInstrumentLayer(object):
@@ -114,6 +151,7 @@ class StrikeInstrumentLayer(object):
 
     def _parse(self, data):
         # 0-47 if there's a sample. FF if not
+        # import pdb; pdb.set_trace()
         self.sample_index = helpers.parse_signed_byte(data[0])
         # mystery pad byte.
         byte2 = data[1]
@@ -164,6 +202,7 @@ class StrikeSamples(object):
 class KitSettings(object):
     def __init__(self, *args, **kwargs):
         # TODO(future) - Enum-type thing for reverb_type, map values to names
+        pass
         self._reverb_type = kwargs.get("reverb_type")
         self._reverb_size = kwargs.get("reverb_size")
         self._reverb_level = kwargs.get("reverb_level")
@@ -304,5 +343,5 @@ def parse_instruments(data):
         result.append(instrument)
     return instrument
 
-parse_file(kit_file)
+# parse_file(kit_file)
 

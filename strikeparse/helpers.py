@@ -57,7 +57,15 @@ def parse_signed_byte(raw):
     value = x - 256
 
     """
-    retval = int(raw, 16)
+    reval = 0
+    if type(raw) is int:
+        retval = 0
+        return reval
+    try:
+        retval = int(raw, 16)
+    except TypeError as typeex:
+        raise
+    
     if retval > 127:
         retval = retval - 256
     return retval
