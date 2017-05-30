@@ -64,43 +64,31 @@ class StrikeKit(object):
     def instruments(self):
         return self._instruments
 
+    @property
+    def samples(self):
+        return self._samples
+
     def _parse_raw_kit(self, data):
         raw_header = data[0:kit_header_size]
         inst_begin = kit_header_size
         inst_end = kit_header_size + (instrument_count * instrument_size)
         raw_instruments = data[inst_begin:inst_end]
-        raw_sampledata = data[inst_end + 1:]
+        raw_sampledata = data[inst_end:]
 
-        self._kit_settings = self._parse_kit_settings(data)
-        self._parse_instruments(data)
+        self._parse_instruments(raw_instruments)
+        self._parse_samples(raw_sampledata)
 
 
-    def _parse_kit_settings(self, data):
-        # header
-        header_data = data[0:52]
-        # KIT header
-        kit_bytes = header_data[0:3]
-        # No idea. 0x202c (32,44)
-        field0 = header_data[3:5]
-        # Zero pad?
-        pad0 = header_data[5:9]
-        # 0x0063 - no idea - kit volume?
-        field0 = header_data[9:11]
-        # kitfx - reverb
-        kitfx_reverb = header_data[11:15]
-
+    def _parse_samples(self, data):
+        self._samples = StrikeSamples(data)
 
     def _parse_instruments(self, data):
         result = []
-        instraw_length = instrument_size * instrument_count
-        # offset the header.
-        inst_offset = instraw_length + kit_header_size
-        # get the slice header:(instcount * instsize)
-        instrument_data = data[kit_header_size:inst_offset]
+        
         for x in range(0, instrument_count):
             start_index = x * instrument_size
             end_index = start_index + instrument_size
-            raw_instrument = instrument_data[start_index:end_index]
+            raw_instrument = data[start_index:end_index]
             instrument = StrikeInstrument(raw_data=raw_instrument)
             result.append(instrument)
         self._instruments = result
@@ -118,14 +106,18 @@ class StrikeInstrument(object):
 
     def _parse(self, data):
         raw_header = data[0:instrument_header_size]
+        # throwaway data.
         inst_header = raw_header[0:8]
-        # TODO(parse trigger ID)
-        raw_trigger_spec = raw_header[8:11]
-        self._trigger_spec = StrikeInstrumentTriggerSpec(raw_trigger_spec)
-        raw_layers = data[kit_header_size:instrument_layer_size*2]
+        # but make sure it's the right throwaway data.
+        assert inst_header == b"instH\x00\x00\x00"
+        self._trigger_spec = StrikeInstrumentTriggerSpec(raw_header[8:11])
+        raw_layers = data[instrument_header_size:instrument_header_size+instrument_layer_size*2]
+        len(raw_layers)
+        assert len(raw_layers) == instrument_layer_size*2
         self.layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:instrument_layer_size])
         self.layer_b = StrikeInstrumentLayer(raw_data=raw_layers[instrument_layer_size:])
-        raw_voice = data[52:]
+        raw_voice = data[instrument_header_size+(2*instrument_layer_size):]
+        assert len(raw_voice) == instrument_voice_size
         self.instrument_settings = StrikeInstrumentSettings(raw_data=raw_voice)
 
 class StrikeInstrumentTriggerSpec(object):
@@ -197,7 +189,33 @@ class StrikeInstrumentSettings(object):
         pad2 = data[15:]
 
 class StrikeSamples(object):
-    pass
+    def __init__(self, raw_data=None, *args, **kwargs):
+        if raw_data:
+            self._parse(raw_data)
+
+    @property
+    def sample_table(self):
+        return self._sample_table
+
+    def _parse(self, data):
+        """
+        Sample table is at the end of file. This makes things a little easier
+        starts with a "str" type indicator, followed by space.
+        
+        The following 4 bytes are a 32-bit integer with the bytes stored in reverse order
+        Since we get them as whole bytes, we can reverse them and parse the resulting hex.
+        This number is our string length.
+
+        Read that size til end of string. Alesis was nice and split them all on NUL boundaries
+        """
+        str_header = data[0:4]
+        size_bytes = data[4:7]
+        # Hey one of our more complicated functions, we only get to use it once
+        table_size = helpers.parse_dword(size_bytes)
+        raw_samples = data[8:]
+        split_samples = raw_samples.split(b"\0")
+        self._sample_table = [str(x) for x in split_samples if x != ""]
+        
 
 class KitSettings(object):
     def __init__(self, *args, **kwargs):
