@@ -1,6 +1,6 @@
 import unittest
 import os
-from strikeparse.kitparse import StrikeKit
+from strikeparse.data_models import StrikeKit
 
 
 class TestStrikeKit(unittest.TestCase):
