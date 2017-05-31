@@ -1,5 +1,5 @@
-from . import constants
-from . import helpers
+from strikeparse import constants
+from strikeparse import helpers
 
 class StrikeKit(object):
     """
@@ -270,6 +270,26 @@ class StrikeInstrumentSettings(object):
 
         if raw_data:
             self._parse(raw_data)
+
+    def __str__(self):
+        return """
+Reverb Send:    {0}
+FX Send:        {1}
+
+Priority:       {2}
+Mute Group:     {3}
+Playback:       {4}
+
+MIDI Channel:   {5}
+MIDI Note:      {6}
+MIDI Gate Time: {7}
+MIDI Note Off:  {8}
+        """.format(self.send_reverb, self.send_fx, helpers.pretty_priority(self.priority),
+                   helpers.pretty_mute_group(self.mutegroup),
+                   helpers.pretty_priority(self.priority),
+                   helpers.pretty_playback(self.playback),
+                   self.midi_channel, self.midi_note, self.midi_gate,
+                   helpers.pretty_note_off(self.midi_noteoff))
 
     def _parse(self, data):
         self.send_reverb = helpers.parse_signed_byte(data[0])
