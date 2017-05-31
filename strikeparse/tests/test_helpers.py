@@ -99,3 +99,13 @@ class TestHelpers(unittest.TestCase):
         expected = "R%s" % abs(value)
         actual = target.pretty_pan(value)
         self.assertEqual(expected, actual)
+
+    def pretty_filter_type_lo(self):
+        value = 0
+        expected = "LO"
+        actual = target.pretty_filter_type(value)
+
+    def pretty_filter_type_hi(self):
+        value = 1
+        expected = "HI"
+        actual = target.pretty_filter_type(value)

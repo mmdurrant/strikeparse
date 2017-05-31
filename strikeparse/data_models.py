@@ -211,6 +211,30 @@ class StrikeInstrumentLayer(object):
     def sample_name(self):
         return self._sample_name
 
+    @property
+    def settings_str(self):
+        return """
+LEVEL:
+    Level:  {0}
+    Pan:    {1}
+    Decay:  {2}
+
+TONE:
+    Tune:   {3}
+    Fine:   {4}
+    Cutoff: {5}
+
+FILTER:
+    Type:   {6}
+    Decay:  {7}
+    Pitch:  {8}
+    Filter: {9}
+    Level:  {10}
+        """.format(self.lvl_level, helpers.pretty_pan(self.lvl_pan), self.lvl_decay,
+                   self.tone_tune, self.tone_fine, self.tone_cutoff,
+                   helpers.pretty_filter_type(self.vel_filtertype),
+                   self.vel_decay, self.vel_pitch, self.vel_filter, self.vel_level)
+
     def __str__(self):
         return "Sample {0}: {1}".format(self._sample_index, self.sample_name)
     

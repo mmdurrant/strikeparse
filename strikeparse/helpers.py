@@ -93,3 +93,5 @@ def pretty_pan(pan_data):
 
     return "{0}{1}".format(prefix, abs(pan_data))
 
+def pretty_filter_type(filter_type):
+    return "LO" if filter_type == 0 else "HI" if filter_type == 1 else "UNKOWN"
