@@ -255,7 +255,6 @@ FILTER:
         self.tone_tune = helpers.parse_signed_byte(data[8])
         self.tone_fine = helpers.parse_signed_byte(data[9])
         self.tone_cutoff = helpers.parse_signed_byte(data[10])
-        # TODO(future)  - parse filtertype
         self.vel_filtertype = helpers.parse_signed_byte(data[11])
         self.vel_decay = helpers.parse_signed_byte(data[12])
         self.vel_pitch = helpers.parse_signed_byte(data[13])
@@ -277,14 +276,11 @@ class StrikeInstrumentSettings(object):
         self.send_fx =  helpers.parse_signed_byte(data[1])
         pad0 = data[2:4]
         self.priority =  helpers.parse_signed_byte(data[4])
-        # TODO(parse mutegroup)
         self.mutegroup =  helpers.parse_signed_byte(data[5])
-        # TODO(parse playback)
         self.playback =  helpers.parse_signed_byte(data[6])
         self.midi_channel = helpers.parse_signed_byte(data[7])
         self.midi_note =  helpers.parse_signed_byte(data[8])
         self.midi_gate = helpers.parse_signed_byte(data[7])
-        # TODO(parse note off)
         self.midi_noteoff = helpers.parse_signed_byte(data[8])
         pad1 = data[9]
         ffterminator = data[10:15]
