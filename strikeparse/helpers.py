@@ -1,3 +1,5 @@
+import struct
+
 def parse_dword(raw):
     """Return unsigned integer from 4 byte word
 
@@ -20,17 +22,26 @@ def parse_dword(raw):
     0200 = 512
     00c8 = 200
     02c8 = 712
+
     """
 
     rv = 0
     try:
-        if raw[0:2] == "0x":
-            raw = raw[2:]
-        hexv = str.join("", [x for x in reversed(str(raw))])
-        # we expect we don't have the necessary 0x prefix.
-        rv = int("0x%s" % hexv, 16)
-    except ValueError as vex:
+        hexv = struct.unpack('<4B', raw)
+        hexv = [x for x in reversed(hexv)]
+        rv = int(''.join("%01x" % i for i in hexv), 16)
+    except TypeError:
+        print("Error - could not parse %s " % raw)
+    except struct.error:
         rv = 0
+    
+    
+
+    # #hexv = bytes([hex(c) for t in zip(raw[1::2], raw[::2]) for c in t])
+    
+    # print(hexv)
+    # # we expect we don't have the necessary 0x prefix.
+    # rv = int("0x%s" % hexv, 16)
 
     # reverse the bytes, make life easy
     return rv
@@ -55,12 +66,15 @@ def parse_signed_byte(raw):
     254 = -2
 
     value = x - 256
+    
 
     """
-    reval = 0
-    if type(raw) is int:
-        retval = 0
-        return reval
+    # if type(raw) is int:
+
+    retval = 0
+    if isinstance(raw, int):
+        retval = raw
+        return retval
     try:
         retval = int(raw, 16)
     except TypeError as typeex:

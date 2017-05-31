@@ -141,25 +141,26 @@ class StrikeInstrument(object):
     
     
     #
-    def __init__(self, raw_data=None, *args, **kwargs):
+    def __init__(self, raw_data=None, samples=[]):
         if raw_data:
-            self._parse(raw_data)
+            self._parse(raw_data, samples)
 
     @property
     def trigger_spec(self):
         return self._trigger_spec
 
-    def _parse(self, data):
+    def _parse(self, data, samples=[]):
         raw_header = data[0:constants.INSTRUMENT_HEADER_SIZE]
         # throwaway data.
         inst_header = raw_header[0:8]
         # but make sure it's the right throwaway data.
         assert inst_header == constants.SENTINEL_INSTRUMENT_HEADER
         self._trigger_spec = StrikeInstrumentTriggerSpec(raw_header[8:11])
-        raw_layers = data[constants.INSTRUMENT_HEADER_SIZE:constants.INSTRUMENT_HEADER_SIZE+constants.INSTRUMENT_LAYER_SIZE*2]
+        raw_layers = data[constants.INSTRUMENT_HEADER_SIZE:constants.INSTRUMENT_HEADER_SIZE+(constants.INSTRUMENT_LAYER_SIZE*2)]
         assert len(raw_layers) == constants.INSTRUMENT_LAYER_SIZE*2
-        self.layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:constants.INSTRUMENT_LAYER_SIZE])
-        self.layer_b = StrikeInstrumentLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:])
+
+        self.layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:constants.INSTRUMENT_LAYER_SIZE], samples=samples)
+        self.layer_b = StrikeInstrumentLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:], samples=samples)
         raw_voice = data[constants.INSTRUMENT_HEADER_SIZE+(2*constants.INSTRUMENT_LAYER_SIZE):]
         assert len(raw_voice) == constants.INSTRUMENT_VOICE_SIZE
         self.instrument_settings = StrikeInstrumentSettings(raw_data=raw_voice)
@@ -180,16 +181,16 @@ class StrikeInstrumentTriggerSpec(object):
 
 
 class StrikeInstrumentLayer(object):
-    def __init__(self, *args, **kwargs):
-        raw_data = kwargs.get("raw_data")
-
+    def __init__(self, raw_data=None, samples=None, *args, **kwargs):
         if raw_data:
-            self._parse(raw_data)
+            self._parse(raw_data, samples)
 
-    def _parse(self, data):
+    def _parse(self, data, samples=None):
         # 0-47 if there's a sample. FF if not
-        # import pdb; pdb.set_trace()
         self._sample_index = helpers.parse_signed_byte(data[0])
+        if self._sample_index >= 0 and self._sample_index != 255:
+            self._sample_name = samples.get_sample_by_index(self._sample_index)
+            print(self._sample_name)
         # mystery pad byte.
         byte2 = data[1]
         self.lvl_level = helpers.parse_signed_byte(data[2])
@@ -207,6 +208,7 @@ class StrikeInstrumentLayer(object):
         self.vel_level = helpers.parse_signed_byte(data[15])
         self.pad1 = data[16]
         self.term_pad = data[17:20]
+    
 
 class StrikeInstrumentSettings(object):
     def __init__(self, *args, **kwargs):
@@ -244,6 +246,7 @@ class StrikeSamples(object):
         return self._sample_table
 
     def get_sample_by_index(self, index):
+
         return self._sample_table[index]
 
     def _parse(self, data):
@@ -257,13 +260,15 @@ class StrikeSamples(object):
 
         Read that size til end of string. Alesis was nice and split them all on NUL boundaries
         """
+
         str_header = data[0:4]
-        size_bytes = data[4:7]
+        size_bytes = data[4:8]
         # Hey one of our more complicated functions, we only get to use it once
+
         table_size = helpers.parse_dword(size_bytes)
         raw_samples = data[8:]
-        split_samples = raw_samples.split(b"\0")
-        self._sample_table = [str(x) for x in split_samples if x != ""]
+        split_samples = map(lambda x:x.decode("utf-8"), raw_samples.split(b"\0"))
+        self._sample_table = list([str(x) for x in split_samples if x != ""])
 
 
 class StrikeKitSettings(object):

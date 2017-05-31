@@ -13,49 +13,56 @@ class TestHelpers(unittest.TestCase):
 
     def test_parse_dword_reverses_bytepairs(self):
         # 4096  + 2 = 4098
-        value = "2001"
+        value = b"\x02\x00\x00\x01"
         expected = 4098
         actual = target.parse_dword(value)
         self.assertEqual(expected, actual)
 
-    def test_parse_dword_hex_prefix(self):
-        value = "0x2001"
-        expected = 4098
-        actual = target.parse_dword(value)
+    def test_signed_byte_int(self):
+        expected = 7
+        actual = target.parse_signed_byte(expected)
         self.assertEqual(expected, actual)
 
     def test_parse_signed_byte_zero(self):
-        value = "00"
+        value = b"00"
         expected = 0
         actual = target.parse_signed_byte(value)
         self.assertEqual(expected, actual)
 
     def test_parse_signed_byte_positive_one(self):
-        value = "01"
+        value = b"01"
         expected = 1
         actual = target.parse_signed_byte(value)
         self.assertEqual(expected, actual)
 
+    # It is so strange I'm _forced_ to write this test.
+    def test_parse_signed_byte_positive_seven(self):
+        value = b'7'
+        expected = 7
+        actual = target.parse_signed_byte(value)
+        self.assertEqual(expected, actual)
+
+
     def test_parse_signed_byte_positive_upperbound(self):
-        value = "7f"
+        value = b"7f"
         expected = 127
         actual = target.parse_signed_byte(value)
         self.assertEqual(expected, actual)
 
     def test_parse_signed_byte_negative_lowerbound(self):
-        value = "80"
+        value = b"80"
         expected = -128
         actual = target.parse_signed_byte(value)
         self.assertEqual(expected, actual)
 
     def test_parse_signed_byte_negative_one(self):
-        value = "FF"
+        value = b"FF"
         expected = -1
         actual = target.parse_signed_byte(value)
         self.assertEqual(expected, actual)
 
     def test_parse_signed_byte_negative_two(self):
-        value = "FE"
+        value = b"FE"
         expected = -2
         actual = target.parse_signed_byte(value)
         self.assertEqual(expected, actual)
