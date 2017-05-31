@@ -53,8 +53,6 @@ class StrikeKit(object):
         # Samples have to be parsed before instruments so we know who uses what.
         self._parse_samples(raw_sampledata)
         self._parse_instruments(raw_instruments)
-        
-
 
     def _parse_samples(self, data):
         self._samples = StrikeSamples(data)
@@ -66,7 +64,7 @@ class StrikeKit(object):
             start_index = x * constants.INSTRUMENT_SIZE
             end_index = start_index + constants.INSTRUMENT_SIZE
             raw_instrument = data[start_index:end_index]
-            instrument = StrikeInstrument(raw_data=raw_instrument, samples=self.samples)
+            instrument = StrikeInstrument(raw_instrument, samples=self.samples)
             result.append(instrument)
         self._instruments = result
 

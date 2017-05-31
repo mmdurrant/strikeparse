@@ -1,5 +1,7 @@
 import struct
 
+from strikeparse import constants
+
 def parse_dword(raw):
     """Return unsigned integer from 4 byte word
 
@@ -94,4 +96,16 @@ def pretty_pan(pan_data):
     return "{0}{1}".format(prefix, abs(pan_data))
 
 def pretty_filter_type(filter_type):
-    return "LO" if filter_type == 0 else "HI" if filter_type == 1 else "UNKOWN"
+    return constants.FILTER_TYPE[filter_type]
+
+def pretty_mute_group(mute_group):
+    return "OFF" if mute_group == 0 else mute_group
+
+def pretty_note_off(note_off):
+    return constants.NOTE_OFF[note_off]
+
+def pretty_priority(priority):
+    return constants.PRIORITY[priority]
+
+def pretty_playback(playback):
+    return constants.PLAYBACK[playback]

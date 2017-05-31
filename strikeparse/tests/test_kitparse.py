@@ -40,7 +40,11 @@ class TestStrikeKit(unittest.TestCase):
         assert not any(x for x in self.kit.instruments if x.layer_a is None)
 
     def test_kit_str(self):
-        print(self.kit)
+        assert str(self.kit)
 
     def test_kit_csv(self):
-        print(self.kit.csv())
+        assert self.kit.csv()
+
+    def test_instrument_setting_str(self):
+        for x in self.kit.instruments:
+            print("%s\n\t%s\t%s" % (x.trigger_spec, x.layer_a.sample_name, x.layer_a.settings_str))

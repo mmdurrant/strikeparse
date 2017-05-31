@@ -23,4 +23,26 @@ INPUT_PINS = {
     "D": "Bell"
 }
 
+NOTE_OFF = [
+    "NOT SENT",
+    "SENT",
+    "ALT"
+]
+
+PRIORITY = [
+    "LOW",
+    "MED",
+    "HI"
+]
+
+FILTER_TYPE = [
+    "LO",
+    "HI"
+]
+
+PLAYBACK = [
+    "POLY",
+    "MONO"
+]
+
 SENTINEL_INSTRUMENT_HEADER = b"instH\x00\x00\x00"

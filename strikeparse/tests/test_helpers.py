@@ -1,6 +1,7 @@
 
 import unittest
 
+from strikeparse import constants
 from strikeparse import helpers as target
 
 
@@ -100,12 +101,74 @@ class TestHelpers(unittest.TestCase):
         actual = target.pretty_pan(value)
         self.assertEqual(expected, actual)
 
-    def pretty_filter_type_lo(self):
+    def test_pretty_filter_type_lo(self):
         value = 0
         expected = "LO"
         actual = target.pretty_filter_type(value)
+        self.assertEqual(expected, actual)
 
-    def pretty_filter_type_hi(self):
+    def test_pretty_filter_type_hi(self):
         value = 1
         expected = "HI"
         actual = target.pretty_filter_type(value)
+        self.assertEqual(expected, actual)
+
+    def test_pretty_mute_group_off(self):
+        value = 0
+        expected = "OFF"
+        actual = target.pretty_mute_group(value)
+        self.assertEqual(expected, actual)
+
+    def test_pretty_mute_group_9(self):
+        value = 9
+        expected = 9
+        actual = target.pretty_mute_group(value)
+        self.assertEqual(expected, actual)
+
+    def test_pretty_note_off_not(self):
+        value = 0
+        expected = constants.NOTE_OFF[value]
+        actual = target.pretty_note_off(value)
+        self.assertEqual(expected, actual)
+
+    def test_pretty_note_off_sent(self):
+        value = 1
+        expected = constants.NOTE_OFF[value]
+        actual = target.pretty_note_off(value)
+        self.assertEqual(expected, actual)
+
+    def test_pretty_note_off_alt(self):
+        value = 2
+        expected = constants.NOTE_OFF[value]
+        actual = target.pretty_note_off(value)
+        self.assertEqual(expected, actual)
+
+    def test_prettY_priority_low(self):
+        value = 0
+        expected = constants.PRIORITY[value]
+        actual = target.pretty_priority(value)
+        self.assertEqual(expected, actual)
+
+    def test_prettY_priority_med(self):
+        value = 1
+        expected = constants.PRIORITY[value]
+        actual = target.pretty_priority(value)
+        self.assertEqual(expected, actual)
+
+    def test_prettY_priority_high(self):
+        value = 2
+        expected = constants.PRIORITY[value]
+        actual = target.pretty_priority(value)
+        self.assertEqual(expected, actual)
+
+    def test_prettY_playback_poly(self):
+        value = 0
+        expected = constants.PLAYBACK[value]
+        actual = target.pretty_playback(value)
+        self.assertEqual(expected, actual)
+
+    def test_prettY_playback_mono(self):
+        value = 1
+        expected = constants.PLAYBACK[value]
+        actual = target.pretty_playback(value)
+        self.assertEqual(expected, actual)
