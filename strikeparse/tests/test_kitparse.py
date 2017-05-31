@@ -35,3 +35,12 @@ class TestStrikeKit(unittest.TestCase):
 
     def test_samples_sample_table_length_nonzero(self):
         assert len(self.kit.samples.sample_table) > 0
+
+    def test_instruments_have_layers(self):
+        assert not any(x for x in self.kit.instruments if x.layer_a is None)
+
+    def test_kit_str(self):
+        print(self.kit)
+
+    def test_kit_csv(self):
+        print(self.kit.csv())

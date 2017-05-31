@@ -25,6 +25,12 @@ class StrikeKit(object):
             # Yea assignment by side effect
             self._parse_raw_kit(raw_data)
 
+    def __str__(self):
+        return "\n".join(map(str, self.instruments))
+
+    def csv(self):
+        return "\n".join(map(str, map(StrikeInstrument.csv, self.instruments)))
+
     @property
     def kit_settings(self):
         return self._kit_settings
@@ -136,18 +142,32 @@ class StrikeInstrument(object):
         63          5 byte FF terminator
         68         11 byte zero pad?
         """
-
-    
-    
     
     #
     def __init__(self, raw_data=None, samples=[]):
         if raw_data:
             self._parse(raw_data, samples)
 
+    def __str__(self):
+        return """{0}
+        Layer A: {1}
+        Layer B: {2}
+        """.format(self.trigger_spec, self.layer_a, self.layer_b)
+
+    def csv(self):
+        return ",".join([self.trigger_spec.csv(), self.layer_a.csv(), self.layer_b.csv()])
+
     @property
     def trigger_spec(self):
         return self._trigger_spec
+
+    @property
+    def layer_a(self):
+        return self._layer_a
+
+    @property
+    def layer_b(self):
+        return self._layer_b
 
     def _parse(self, data, samples=[]):
         raw_header = data[0:constants.INSTRUMENT_HEADER_SIZE]
@@ -159,8 +179,8 @@ class StrikeInstrument(object):
         raw_layers = data[constants.INSTRUMENT_HEADER_SIZE:constants.INSTRUMENT_HEADER_SIZE+(constants.INSTRUMENT_LAYER_SIZE*2)]
         assert len(raw_layers) == constants.INSTRUMENT_LAYER_SIZE*2
 
-        self.layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:constants.INSTRUMENT_LAYER_SIZE], samples=samples)
-        self.layer_b = StrikeInstrumentLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:], samples=samples)
+        self._layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:constants.INSTRUMENT_LAYER_SIZE], samples=samples)
+        self._layer_b = StrikeInstrumentLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:], samples=samples)
         raw_voice = data[constants.INSTRUMENT_HEADER_SIZE+(2*constants.INSTRUMENT_LAYER_SIZE):]
         assert len(raw_voice) == constants.INSTRUMENT_VOICE_SIZE
         self.instrument_settings = StrikeInstrumentSettings(raw_data=raw_voice)
@@ -178,19 +198,32 @@ class StrikeInstrumentTriggerSpec(object):
 
     def __str__(self):
         return "{0}{1} {2}".format(self.input_type, self.input_index, self.input_pin)
-
+    
+    def csv(self):
+        return str(self)
 
 class StrikeInstrumentLayer(object):
     def __init__(self, raw_data=None, samples=None, *args, **kwargs):
         if raw_data:
             self._parse(raw_data, samples)
 
+    @property
+    def sample_name(self):
+        return self._sample_name
+
+    def __str__(self):
+        return "Sample {0}: {1}".format(self._sample_index, self.sample_name)
+    
+    def csv(self):
+        return "{0}".format(self.sample_name)
+
     def _parse(self, data, samples=None):
         # 0-47 if there's a sample. FF if not
         self._sample_index = helpers.parse_signed_byte(data[0])
         if self._sample_index >= 0 and self._sample_index != 255:
             self._sample_name = samples.get_sample_by_index(self._sample_index)
-            print(self._sample_name)
+        else:
+            self._sample_name = ""
         # mystery pad byte.
         byte2 = data[1]
         self.lvl_level = helpers.parse_signed_byte(data[2])
