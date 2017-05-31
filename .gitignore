@@ -102,3 +102,6 @@ ENV/
 
 # nose test file
 .nose*
+
+# don't include proprietary data that's not ours
+strikeparse/data/*.skt
