@@ -45,4 +45,30 @@ PLAYBACK = [
     "MONO"
 ]
 
+REVERB_TYPE = [
+    "OFF",
+    "AmbBrite",
+    "BdSpring",
+    "BigGate",
+    "CloseMic",
+    "FxGate",
+    "HugeSpace",
+    "LgSpacy",
+    "Md80sRm",
+    "MdHrdRm",
+    "MdSoftRm",
+    "MetalCav",
+    "RmSmlDrk",
+    "RoomGate",
+    "SeaWolf",
+    "Slapper",
+    "SmBathRm",
+    "SmPlate",
+    "SmlBrite",
+    "Studio",
+    "Warehouse",
+    "WoodRm",
+    "WrmStudio"
+]
+
 SENTINEL_INSTRUMENT_HEADER = b"instH\x00\x00\x00"

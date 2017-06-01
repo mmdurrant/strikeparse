@@ -109,3 +109,6 @@ def pretty_priority(priority):
 
 def pretty_playback(playback):
     return constants.PLAYBACK[playback]
+
+def pretty_reverb_type(reverb_type):
+    return constants.REVERB_TYPE[reverb_type]
