@@ -45,6 +45,7 @@ class StrikeKit(object):
 
     def _parse_raw_kit(self, data):
         raw_header = data[0:constants.KIT_HEADER_SIZE]
+        self._parse_header(raw_header)
         inst_begin = constants.KIT_HEADER_SIZE
         inst_end = constants.KIT_HEADER_SIZE + (constants.INSTRUMENT_COUNT * constants.INSTRUMENT_SIZE)
         raw_instruments = data[inst_begin:inst_end]
@@ -53,6 +54,15 @@ class StrikeKit(object):
         # Samples have to be parsed before instruments so we know who uses what.
         self._parse_samples(raw_sampledata)
         self._parse_instruments(raw_instruments)
+
+    def _parse_header(self, data):
+        """
+            Header is 52 bytes
+            KIT followed by SPC terminator
+            4 byte little endian integer declaring header length? 0x2c/44 in every file we've found.
+            What follows isn't much.
+        """
+        pass
 
     def _parse_samples(self, data):
         self._samples = StrikeSamples(data)
@@ -351,6 +361,6 @@ class StrikeKitSettings(object):
         self._reverb_level = kwargs.get("reverb_level")
 
         
-    def parse(self, data):
-        # Parse method is responsible for populating private vars.
+    def _parse(self, data):
+        
         raise NotImplementedError("Abstract class method requires implementation")
