@@ -599,10 +599,6 @@ class StrikeFxSettings(object):
 
 class StrikeInstrumentFile(object):
     """
-        
-        
-<<<<<<< HEAD:data_models.py
-
         offset      12 (that's weird) byte header
                     ------------------
         0           4 byte 0x696e7374       - Begin "INST" header
