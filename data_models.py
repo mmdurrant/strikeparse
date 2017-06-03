@@ -322,6 +322,7 @@ class StrikeKitVoiceTriggerSpec(object):
     def csv(self):
         return str(self)
 
+
 class StrikeKitVoiceLayer(object):
     def __init__(self, raw_data=None, samples=None, *args, **kwargs):
         if raw_data:
@@ -600,6 +601,7 @@ class StrikeInstrumentFile(object):
     """
         
         
+<<<<<<< HEAD:data_models.py
 
         offset      12 (that's weird) byte header
                     ------------------
