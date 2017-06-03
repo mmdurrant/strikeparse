@@ -546,21 +546,6 @@ class StrikeFxSettings(object):
         self._damping = helpers.parse_signed_byte(data[10])
         mystery_byte = data[11]
 
-
-        """
-        0c byte                 - kit fx. FX type + values. Some values stored as 2 byte little endian
-                              1 byte fx type
-                              1 byte fx level
-                              2 byte delay l
-                              2 byte delay r
-                              1 byte feedback l
-                              1 byte feedback r
-                              1 byte depth
-                              1 byte rate
-                              1 byte signed damping
-                              1 byte terminator?    
-        """
-
     @property
     def fx_type(self):
         return self._fx_type
@@ -596,6 +581,7 @@ class StrikeFxSettings(object):
     @property
     def damping(self):
         return self._damping
+
 
 class StrikeInstrumentFile(object):
     """
