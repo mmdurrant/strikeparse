@@ -518,6 +518,7 @@ class StrikeReverbSettings(object):
         self._reverb_color = data[2]
         self._reverb_level = data[3]
 
+
 class StrikeFxSettings(object):
     def __init__(self, raw_data=None, *args, **kwargs):
         if raw_data:
