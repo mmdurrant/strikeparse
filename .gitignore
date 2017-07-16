@@ -105,3 +105,6 @@ ENV/
 
 # don't include proprietary data that's not ours
 strikeparse/data/*.skt
+
+# Visual Studio garbage
+.vs/
