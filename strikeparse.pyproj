@@ -12,6 +12,10 @@
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId>MSBuild|strikeparse|$(MSBuildProjectFullPath)</InterpreterId>
+    <CommandLineArguments>
+    </CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -32,31 +36,15 @@
     <Compile Include="src\strikeparse\__init__.py" />
     <Compile Include="src\strikeparse\__main__.py" />
     <Compile Include="src\strikeparse\__version__.py" />
-    <Compile Include="strikeparse\constants.py" />
-    <Compile Include="strikeparse\csvinstruments.py" />
-    <Compile Include="strikeparse\csvkits.py" />
-    <Compile Include="strikeparse\data_models.py" />
-    <Compile Include="strikeparse\helpers.py" />
-    <Compile Include="strikeparse\kitparse.py" />
-    <Compile Include="strikeparse\tests\test_helpers.py" />
-    <Compile Include="strikeparse\tests\test_kitparse.py" />
-    <Compile Include="strikeparse\tests\__init__.py" />
-    <Compile Include="strikeparse\__init__.py" />
     <Compile Include="test\test_cli.py" />
     <Compile Include="test\test_core.py" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="strikeparse\instruments.csv" />
-    <Content Include="strikeparse\kits.csv" />
-    <Content Include="strikeparse\tests\testdata.skt" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="doc" />
+    <Folder Include="src\" />
     <Folder Include="src\strikeparse" />
     <Folder Include="src\strikeparse\api" />
     <Folder Include="src\strikeparse\core" />
-    <Folder Include="strikeparse" />
-    <Folder Include="strikeparse\tests" />
     <Folder Include="test" />
   </ItemGroup>
   <ItemGroup>

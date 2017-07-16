@@ -22,7 +22,7 @@ from tempfile import mkdtemp
 
 
 _NAME = "strikeparse"
-_REPO = None  # FIXME: specify the default Git repo to use
+_REPO = "git@github.com:mmdurrant/strikeparse"  # FIXME: specify the default Git repo to use
 
 
 def _cmdline(argv=None):
