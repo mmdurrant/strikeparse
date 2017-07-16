@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0a6dcb39-549d-4171-b0d6-56e0c7e20317}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>deploy.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId>MSBuild|strikeparse|$(MSBuildProjectFullPath)</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="deploy.py" />
+    <Compile Include="doc\conf.py" />
+    <Compile Include="setup.py" />
+    <Compile Include="src\strikeparse\api\cmd1.py" />
+    <Compile Include="src\strikeparse\api\cmd2.py" />
+    <Compile Include="src\strikeparse\api\__init__.py" />
+    <Compile Include="src\strikeparse\cli.py" />
+    <Compile Include="src\strikeparse\core\_config.py" />
+    <Compile Include="src\strikeparse\core\_logger.py" />
+    <Compile Include="src\strikeparse\core\__init__.py" />
+    <Compile Include="src\strikeparse\__init__.py" />
+    <Compile Include="src\strikeparse\__main__.py" />
+    <Compile Include="src\strikeparse\__version__.py" />
+    <Compile Include="strikeparse\constants.py" />
+    <Compile Include="strikeparse\csvinstruments.py" />
+    <Compile Include="strikeparse\csvkits.py" />
+    <Compile Include="strikeparse\data_models.py" />
+    <Compile Include="strikeparse\helpers.py" />
+    <Compile Include="strikeparse\kitparse.py" />
+    <Compile Include="strikeparse\tests\test_helpers.py" />
+    <Compile Include="strikeparse\tests\test_kitparse.py" />
+    <Compile Include="strikeparse\tests\__init__.py" />
+    <Compile Include="strikeparse\__init__.py" />
+    <Compile Include="test\test_cli.py" />
+    <Compile Include="test\test_core.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="strikeparse\instruments.csv" />
+    <Content Include="strikeparse\kits.csv" />
+    <Content Include="strikeparse\tests\testdata.skt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="doc" />
+    <Folder Include="src\strikeparse" />
+    <Folder Include="src\strikeparse\api" />
+    <Folder Include="src\strikeparse\core" />
+    <Folder Include="strikeparse" />
+    <Folder Include="strikeparse\tests" />
+    <Folder Include="test" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include=".tox\py27\">
+      <Id>strikeparse</Id>
+      <Description>py27 (Python 2.7 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <Version>2.7</Version>
+      <Architecture>X64</Architecture>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+    </Interpreter>
+    <Interpreter Include=".tox\py35\">
+      <Id>strikeparse</Id>
+      <Description>py35 (Python 3.5 (32-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <Version>3.5</Version>
+      <Architecture>X86</Architecture>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>
