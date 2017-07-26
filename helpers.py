@@ -115,7 +115,7 @@ def pretty_reverb_type(reverb_type):
     return constants.REVERB_TYPE[reverb_type]
 
 def pretty_fx_type(fx_type):
-    return constants.FX_TYPE[fx_type]
+    return constants.FxType(fx_type)
 
 def reverb_by_index_or_name(value):
     return _name_or_id(value, constants.REVERB_TYPE, constants.REVERB_TYPE_VALUES)

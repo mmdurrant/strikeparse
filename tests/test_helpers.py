@@ -1,7 +1,12 @@
 
 import unittest
 
+import binascii
+
+
 from strikeparse import constants
+from strikeparse import data_models
+
 from strikeparse import helpers as target
 
 
@@ -188,9 +193,18 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_pretty_fx_type_vibrato(self):
-        value = 9
-        expected = constants.FX_TYPE[value]
+        value = constants.FxType.Vibrato
+        expected = constants.FxType(value)
         actual = target.pretty_fx_type(value)
         self.assertEqual(expected, actual)
 
-        
+    def test_FxSetting_raw_data(self):
+        hex_data = "0163010001005855461c0000000000"
+        raw_data = binascii.a2b_hex(hex_data)
+        actual = data_models.StrikeFxSettings(raw_data)
+        self.assertEqual(actual.fx_type, constants.FxType.StereoFlanger)
+        self.assertEqual(actual.rate, 28)
+        self.assertEqual(actual.depth, 70)
+        self.assertEqual(actual.feedback_left, 88)
+        self.assertEqual(actual.level, 99)
+

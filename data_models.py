@@ -597,5 +597,12 @@ class StrikeFxSettings(object):
         return self._damping
 
 
+class EnumType(object):
+    def __init__(self, in_dict):
+        self.__dict__ = in_dict
 
-
+    #def __getattribute__(self, attr):
+    #    if attr in self._data:
+    #        return self._data.get(attr)
+    #    else:
+    #        return super().__getattribute__(attr)
