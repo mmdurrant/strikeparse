@@ -71,4 +71,24 @@ REVERB_TYPE = [
     "WrmStudio"
 ]
 
+FX_TYPE = [
+    "OFF",
+    "Mono Flanger",
+    "Stereo Flanger",
+    "Xover Flanger",
+    "Mono Chorus 1",
+    "Mono Chorus 2",
+    "Stereo Chorus",
+    "XOver Chorus",
+    "Mono Vibrato",
+    "Vibrato",
+    "Mono Doubler",
+    "Mono Slapback",
+    "Slapback",
+    "Mono Delay",
+    "Delay",
+    "XOver Delay",
+    "Ping Pong"
+]
+
 SENTINEL_INSTRUMENT_HEADER = b"instH\x00\x00\x00"

@@ -113,3 +113,6 @@ def pretty_playback(playback):
 
 def pretty_reverb_type(reverb_type):
     return constants.REVERB_TYPE[reverb_type]
+
+def pretty_fx_type(fx_type):
+    return constants.FX_TYPE[fx_type]

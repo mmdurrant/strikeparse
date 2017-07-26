@@ -26,10 +26,10 @@ class TestHelpers(unittest.TestCase):
         actual = target.parse_dword(value, 2)
         self.assertEqual(expected, actual)
 
-    def test_parse_dword_3_bytes_fails(self):
-        # a4 01 = 420
+    def test_parse_dword_3_bytes_pads(self):
+        # a4 1 03 00 = 420
         value = b"\xa4\x01\x03"
-        expected = 420
+        expected = 12708
         actual = target.parse_dword(value)
         self.assertEqual(expected, actual)
 
@@ -185,4 +185,10 @@ class TestHelpers(unittest.TestCase):
         value = 1
         expected = constants.PLAYBACK[value]
         actual = target.pretty_playback(value)
+        self.assertEqual(expected, actual)
+
+    def test_pretty_fx_type_vibrato(self):
+        value = 9
+        expected = constants.FX_TYPE[value]
+        actual = target.pretty_fx_type(value)
         self.assertEqual(expected, actual)
