@@ -105,3 +105,38 @@ ENV/
 
 # don't include proprietary data that's not ours
 strikeparse/data/*.skt
+
+# Visual Studio garbage
+.vs/
+
+# Ignore Python build artifacts.
+
+MANIFEST
+build/
+dist/
+*.egg-info/
+*.pyc
+*.pyo
+
+
+# Ignore virtualenv environments.
+
+venv*/
+
+
+# Ignore Vagrant runtime files.
+
+.vagrant/
+
+
+# Ignore settings for various IDEs.
+
+.idea/
+.project/
+.pydevproject/
+nbproject/
+
+
+# Ignore OS metadata files.
+
+.DS_Store
