@@ -1,7 +1,12 @@
 
 import unittest
 
+import binascii
+
+
 from strikeparse import constants
+from strikeparse import data_models
+
 from strikeparse import helpers as target
 
 
@@ -16,6 +21,20 @@ class TestHelpers(unittest.TestCase):
         # 4096  + 2 = 4098
         value = b"\x02\x00\x00\x01"
         expected = 4098
+        actual = target.parse_dword(value)
+        self.assertEqual(expected, actual)
+
+    def test_parse_dword_2_bytes(self):
+        # a4 01 = 420
+        value = b"\xa4\x01"
+        expected = 420
+        actual = target.parse_dword(value, 2)
+        self.assertEqual(expected, actual)
+
+    def test_parse_dword_3_bytes_pads(self):
+        # a4 1 03 00 = 420
+        value = b"\xa4\x01\x03"
+        expected = 12708
         actual = target.parse_dword(value)
         self.assertEqual(expected, actual)
 
@@ -172,3 +191,20 @@ class TestHelpers(unittest.TestCase):
         expected = constants.PLAYBACK[value]
         actual = target.pretty_playback(value)
         self.assertEqual(expected, actual)
+
+    def test_pretty_fx_type_vibrato(self):
+        value = constants.FxType.Vibrato
+        expected = constants.FxType(value)
+        actual = target.pretty_fx_type(value)
+        self.assertEqual(expected, actual)
+
+    def test_FxSetting_raw_data(self):
+        hex_data = "0163010001005855461c0000000000"
+        raw_data = binascii.a2b_hex(hex_data)
+        actual = data_models.StrikeFxSettings(raw_data)
+        self.assertEqual(actual.fx_type, constants.FxType.StereoFlanger)
+        self.assertEqual(actual.rate, 28)
+        self.assertEqual(actual.depth, 70)
+        self.assertEqual(actual.feedback_left, 88)
+        self.assertEqual(actual.level, 99)
+

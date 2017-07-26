@@ -2,8 +2,8 @@ import struct
 
 from strikeparse import constants
 
-def parse_dword(raw):
-    """Return unsigned integer from 4 byte word
+def parse_dword(raw, wordsize=4):
+    """Return unsigned integer from <param:wordsize> byte word
 
     :param raw: Raw 4 byte string
 
@@ -29,7 +29,8 @@ def parse_dword(raw):
 
     rv = 0
     try:
-        hexv = struct.unpack('<4B', raw)
+        unpck_fmt = '<%sB' % len(raw)
+        hexv = struct.unpack(unpck_fmt, raw)
         hexv = [x for x in reversed(hexv)]
         rv = int(''.join("%01x" % i for i in hexv), 16)
     except TypeError:
@@ -112,3 +113,12 @@ def pretty_playback(playback):
 
 def pretty_reverb_type(reverb_type):
     return constants.REVERB_TYPE[reverb_type]
+
+def pretty_fx_type(fx_type):
+    return constants.FxType(fx_type)
+
+def reverb_by_index_or_name(value):
+    return _name_or_id(value, constants.REVERB_TYPE, constants.REVERB_TYPE_VALUES)
+
+def name_or_id(value, named={}, identified={}):
+    return named.get(value, identified.get(value))
