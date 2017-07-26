@@ -499,15 +499,15 @@ class StrikeReverbSettings(object):
         return self._reverb_type
 
     @property
-    def reverb_size(self):
+    def size(self):
         return self._reverb_size
 
     @property
-    def reverb_level(self):
+    def level(self):
         return self._reverb_level
 
     @property
-    def reverb_color(self):
+    def color(self):
         return self._reverb_color
 
     def _parse(self, data):
@@ -565,7 +565,7 @@ class StrikeFxSettings(object):
         return self._fx_type
 
     @property
-    def fx_level(self):
+    def level(self):
         return self._fx_level
 
     @property

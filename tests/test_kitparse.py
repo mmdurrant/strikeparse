@@ -63,8 +63,16 @@ class TestStrikeKit(unittest.TestCase):
         ks = self.kit.kit_settings
         assert ks.reverb
         assert ks.reverb.reverb_type == "BigGate"
-        assert ks.reverb.reverb_color == 50
-        assert ks.reverb.reverb_size == 75
-        assert ks.reverb.reverb_size == 32
+        self.assertEqual(ks.reverb.color, 50)
+        self.assertEqual(ks.reverb.size, 75)
+        self.assertEqual(ks.reverb.level, 32)
         
-    
+    def test_kit_settings_fx(self):
+        fx = self.kit.kit_settings.fx
+        assert fx
+        self.assertEqual(fx.delay_left, 800)
+        self.assertEqual(fx.delay_right, 300)
+        self.assertEqual(fx.feedback_left, 55)
+        self.assertEqual(fx.feedback_right, 78)
+        self.assertEqual(fx.damping, 00)
+        self.assertEqual(fx.level, 99)
