@@ -63,4 +63,8 @@ class TestStrikeKit(unittest.TestCase):
         ks = self.kit.kit_settings
         assert ks.reverb
         assert ks.reverb.reverb_type == "BigGate"
+        assert ks.reverb.reverb_color == 50
+        assert ks.reverb.reverb_size == 75
+        assert ks.reverb.reverb_size == 32
         
+    
