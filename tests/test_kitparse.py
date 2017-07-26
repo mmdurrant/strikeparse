@@ -1,5 +1,9 @@
 import unittest
 import os
+
+from strikeparse import constants
+from strikeparse import helpers
+
 from strikeparse.data_models import StrikeKit
 
 
@@ -48,3 +52,15 @@ class TestStrikeKit(unittest.TestCase):
     def test_instrument_setting_str(self):
         for x in self.kit.instruments:
             print("%s\n\t%s\t%s" % (x.trigger_spec, x.layer_a.sample_name, x.layer_a.settings_str))
+
+    def test_kit_settings_not_none(self):
+        ks = self.kit.kit_settings
+        assert ks
+        assert ks.reverb
+        assert ks.fx
+    
+    def test_kit_settings_reverb(self):
+        ks = self.kit.kit_settings
+        assert ks.reverb
+        assert ks.reverb.reverb_type == "BigGate"
+        

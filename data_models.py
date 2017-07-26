@@ -175,9 +175,6 @@ class StrikeKit(object):
         raw_header = data[8:8+header_length]
         raw_settings = raw_header[8:24]
         self._kit_settings = StrikeKitSettings(raw_settings)
-        
-
-        pass
 
     def _parse_samples(self, data):
         self._samples = StrikeSamples(data)
@@ -563,41 +560,42 @@ class StrikeFxSettings(object):
                               1 byte terminator?    
         """
 
-        @property
-        def fx_type(self):
-            return _fx_type
+    @property
+    def fx_type(self):
+        return self._fx_type
 
-        @property
-        def fx_level(self):
-            return _fx_level
+    @property
+    def fx_level(self):
+        return self._fx_level
 
-        @property
-        def delay_left(self):
-            return _delay_left
+    @property
+    def delay_left(self):
+        return self._delay_left
 
-        @property
-        def delay_right(self):
-            return _delay_right
+    @property
+    def delay_right(self):
+        return self._delay_right
 
-        @property
-        def feedback_left(self):
-            return _feedback_left
+    @property
+    def feedback_left(self):
+        return self._feedback_left
 
-        @property
-        def feedback_right(self):
-            return _feedback_right
+    @property
+    def feedback_right(self):
+        return self._feedback_right
 
-        @property
-        def depth(self):
-            return _depth
+    @property
+    def depth(self):
+        return self._depth
 
-        @property
-        def rate(self):
-            return _rate
+    @property
+    def rate(self):
+        return self._rate
 
-        @property
-        def damping(self):
-            return _damping
+    @property
+    def damping(self):
+        return self._damping
+
 
 
 

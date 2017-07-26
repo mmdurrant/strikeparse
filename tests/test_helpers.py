@@ -192,3 +192,5 @@ class TestHelpers(unittest.TestCase):
         expected = constants.FX_TYPE[value]
         actual = target.pretty_fx_type(value)
         self.assertEqual(expected, actual)
+
+        
