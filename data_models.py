@@ -170,6 +170,13 @@ class StrikeKit(object):
             4 byte little endian integer declaring header length? 0x2c/44 in every file we've found.
             What follows isn't much.
         """
+        kit_header = data[0:4]
+        header_length = helpers.parse_dword(data[4:8])
+        raw_header = data[8:8+header_length]
+        raw_settings = raw_header[8:24]
+        self._kit_settings = StrikeKitSettings(raw_settings)
+        
+
         pass
 
     def _parse_samples(self, data):
@@ -461,25 +468,34 @@ class StrikeSamples(object):
 
 
 class StrikeKitSettings(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, raw_data=None, *args, **kwargs):
         # TODO(future) - Enum-type thing for reverb_type, map values to names
-        pass
-        self._reverb_type = kwargs.get("reverb_type")
-        self._reverb_size = kwargs.get("reverb_size")
-        self._reverb_level = kwargs.get("reverb_level")
+        if raw_data:
+            self._parse(raw_data)
 
         
     def _parse(self, data):
-        
-        raise NotImplementedError("Abstract class method requires implementation")
+            self._reverb = StrikeReverbSettings(raw_data=data[0:4])
+            self._fx = StrikeFxSettings(raw_data=data[4:16])
 
+    @property
+    def reverb(self):
+        return self._reverb
+
+    @property
+    def fx(self):
+        return self._fx
 
 class StrikeReverbSettings(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, raw_data=None, *args, **kwargs):
         # TODO(future) - Enum-type thing for reverb_type, map values to names
-        self._reverb_type = kwargs.get("reverb_type")
-        self._reverb_size = kwargs.get("reverb_size")
-        self._reverb_level = kwargs.get("reverb_level")
+        if raw_data:
+            self._parse(raw_data)
+        else:
+            self._reverb_type = kwargs.get("reverb_type")
+            self._reverb_size = kwargs.get("reverb_size")
+            self._reverb_level = kwargs.get("reverb_level")
+            self._reverb_color = kwargs.get("reverb_color")
 
     @property
     def reverb_type(self):
@@ -489,26 +505,51 @@ class StrikeReverbSettings(object):
     def reverb_size(self):
         return self._reverb_size
 
+    @property
     def reverb_level(self):
         return self._reverb_level
 
+    @property
+    def reverb_color(self):
+        return self._reverb_color
+
+    def _parse(self, data):
+        self._reverb_type_val = data[0]
+        self._reverb_type = helpers.pretty_reverb_type(self._reverb_type_val)
+        self._reverb_size = data[1]
+        self._reverb_color = data[2]
+        self._reverb_level = data[3]
 
 class StrikeFxSettings(object):
-    def __init__(self, *args, **kwargs):
-        # TODO(future) - Enum-type thing for reverb_type, map values to names
+    def __init__(self, raw_data=None, *args, **kwargs):
+        if raw_data:
+            self._parse(raw_data)
+        else:
+            self._fx_type = kwargs.get("fx_type")
+            self._fx_level = kwargs.get("fx_level")
+            self._delay_left = kwargs.get("delay_left")
+            self._delay_right = kwargs.get("delay_right")
+            self._feedback_left = kwargs.get("feedback_left")
+            self._feedback_right = kwargs.get("feedback_right")
+            self._depth = kwargs.get("depth")
+            self._rate = kwargs.get("rate")
+            self._damping = kwargs.get("damp")
 
-        self._fx_type = kwargs.get("fx_type")
-        self._fx_level = kwargs.get("fx_level")
-        self._delay_left = kwargs.get("delay_left")
-        self._delay_right = kwargs.get("delay_right")
-        self._feedback_left = kwargs.get("feedback_left")
-        self._feedback_right = kwargs.get("feedback_right")
-        self._depth = kwargs.get("depth")
-        self._rate = kwargs.get("rate")
-        self._damping = kwargs.get("damp")
+    def _parse(self, data):
+        self._fx_type_val = data[0]
+        self._fx_type = helpers.pretty_fx_type(self._fx_type_val)
+        self._fx_level = data[1]
+        self._delay_left = helpers.parse_dword(data[2:4])
+        self._delay_right = helpers.parse_dword(data[4:6])
+        self._feedback_left = data[6]
+        self._feedback_right = data[7]
+        self._depth = data[8]
+        self._rate = data[9]
+        self._damping = helpers.parse_signed_byte(data[10])
+        mystery_byte = data[11]
 
-        def _parse(self, data):
-                    """
+
+        """
         0c byte                 - kit fx. FX type + values. Some values stored as 2 byte little endian
                               1 byte fx type
                               1 byte fx level
