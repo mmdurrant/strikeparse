@@ -1,6 +1,7 @@
 from strikeparse import constants
 from strikeparse import helpers
 
+
 class StrikeKit(object):
     """
     File/Kit Header
@@ -12,6 +13,113 @@ class StrikeKit(object):
     02 byte 0x0063          - 00, 99
     04 byte                 - Flag data?
     04 byte                 - kit settings - reverb type, size, color, level
+    0c byte                 - kit fx. FX type + values. Some values stored as 2 byte little endian
+                              1 byte fx type
+                              1 byte fx level
+                              2 byte delay l
+                              2 byte delay r
+                              1 byte feedback l
+                              1 byte feedback r
+                              1 byte depth
+                              1 byte rate
+                              1 byte signed damping
+                              1 byte terminator?
+    
+    Example:
+                              04 63 1e 00 23 00 43 00 3a 24 00 00
+                              04 = kitfx type = mono chorus 2
+                              63 = fx level
+                              1e 00 = 30 = delay l
+                              23 00 = 35 = delay r
+                              43  = 67 = feedback  (not used)
+                              00  = 0 = feedback right
+                              3a = 58 = depth
+                              24 = 36 = rate
+                              00 = damping (not used - signed)
+                              00 = ??
+    
+    Example:
+                              0f 63 a4 01 44 02 45 47 00 00 2a 00 
+                              0f - FX type - xover delay
+                              99 - FX level
+                              a4 01 = 256 + 164 = 420 delay left
+                              44 02 = 512 + 68 = 580 delay right
+                              45 = 69 = feedback l
+                              57 = 71 = feedback r
+                              00 00 = who knows
+                              2a = 42 = damping
+                              00 = who knows
+
+                              0e 64 20 03 2c 01 37 4e 00 00 1f 00 
+                              0e - FX type - stereo delay
+                              99 - fx level
+                              20 03 = 768 + 32 = 800 = delay l
+                              2c 01 = 256 + 44 = 300 = delay r
+                              37 = 55 = feedback left
+                              4e = 78 = feedback right
+                              00 00 = who knows
+                              2a = 42 = damping
+                              00 = who knows
+
+                              03 5c 17 00 17 00 2b 00 3a 24 00 00
+                              03 5c 17 00 17 00 2b 00 3a 24 00 00
+                              03 - FX type - mono chorus 1
+                              5c - = 92 = fx level
+                              17 00 = 23 + 0 = ??
+                              17 00 = 23 + 0 = ??
+                              2b 00 = 43 = feedback
+                              3a = 58 = chorus depth
+                              24 = 36 = chorus rate
+                              00 = ??
+                              00 = who knows
+
+                              04 63 1e 00 23 00 43 00 3a 24 00 00
+                              03 - FX type - mono chorus 2
+                              63 = 99 = fx level
+                              1e 00 = 30 + 0 = ??
+                              2e 00 = 35 + 0 = ??
+                              43 00 = 67 = feedback
+                              3a = 58 = chorus depth
+                              24 = 36 = chorus rate
+                              00 = ??
+                              00 = who knows
+
+                              0d 57 a3 00 2c 01 37 37 00 00 2d 00
+                              0d - fx type - mono delay
+                              57 - fx level - 87
+                              a3 00 = 163 = delay
+                              2c 01 = 300 ???
+                              37 = 55 = feedback
+                              37 = 55 again?
+                              00 = ??
+                              00 = ??
+                              2d = 45 = damp
+                              00
+
+                              0e 63 20 03 2c 01 37 4e 00 00 d9 00
+                              0e - fx type - delay
+                              63 = fx level = 99
+                              20 03 = 800 = delay l
+                              2c 01 = 300 = delay r
+                              37 = 55 = feedback l
+                              4e = 78 = feedback r
+                              00 = ??
+                              00 = ??
+                              d9 = 217 = (217 - 256) = -39
+                              00 = ??
+
+                              0f 63 2c 01 58 02 47 47 00 00 bd 00
+                              0f = fx type = xover dly
+                              63 - level
+                              2c 01 = 300 = delay l
+                              58 02 = 600 = delay r
+                              47 = feedback
+                              47 = feedback
+                              00 = ??
+                              00 = ??
+                              bd = 189 = (189 - 256) = -67
+                              00 = ??
+
     33 byte Kit data?       - Appears to be kit-specific settings, needs decoding.
     """
     def __init__(self, *args, **kwargs):
@@ -364,3 +472,91 @@ class StrikeKitSettings(object):
     def _parse(self, data):
         
         raise NotImplementedError("Abstract class method requires implementation")
+
+
+class StrikeReverbSettings(object):
+    def __init__(self, *args, **kwargs):
+        # TODO(future) - Enum-type thing for reverb_type, map values to names
+        self._reverb_type = kwargs.get("reverb_type")
+        self._reverb_size = kwargs.get("reverb_size")
+        self._reverb_level = kwargs.get("reverb_level")
+
+    @property
+    def reverb_type(self):
+        return self._reverb_type
+
+    @property
+    def reverb_size(self):
+        return self._reverb_size
+
+    def reverb_level(self):
+        return self._reverb_level
+
+
+class StrikeFxSettings(object):
+    def __init__(self, *args, **kwargs):
+        # TODO(future) - Enum-type thing for reverb_type, map values to names
+
+        self._fx_type = kwargs.get("fx_type")
+        self._fx_level = kwargs.get("fx_level")
+        self._delay_left = kwargs.get("delay_left")
+        self._delay_right = kwargs.get("delay_right")
+        self._feedback_left = kwargs.get("feedback_left")
+        self._feedback_right = kwargs.get("feedback_right")
+        self._depth = kwargs.get("depth")
+        self._rate = kwargs.get("rate")
+        self._damping = kwargs.get("damp")
+
+        def _parse(self, data):
+                    """
+        0c byte                 - kit fx. FX type + values. Some values stored as 2 byte little endian
+                              1 byte fx type
+                              1 byte fx level
+                              2 byte delay l
+                              2 byte delay r
+                              1 byte feedback l
+                              1 byte feedback r
+                              1 byte depth
+                              1 byte rate
+                              1 byte signed damping
+                              1 byte terminator?    
+        """
+
+        @property
+        def fx_type(self):
+            return _fx_type
+
+        @property
+        def fx_level(self):
+            return _fx_level
+
+        @property
+        def delay_left(self):
+            return _delay_left
+
+        @property
+        def delay_right(self):
+            return _delay_right
+
+        @property
+        def feedback_left(self):
+            return _feedback_left
+
+        @property
+        def feedback_right(self):
+            return _feedback_right
+
+        @property
+        def depth(self):
+            return _depth
+
+        @property
+        def rate(self):
+            return _rate
+
+        @property
+        def damping(self):
+            return _damping
+
+
+

@@ -19,6 +19,20 @@ class TestHelpers(unittest.TestCase):
         actual = target.parse_dword(value)
         self.assertEqual(expected, actual)
 
+    def test_parse_dword_2_bytes(self):
+        # a4 01 = 420
+        value = b"\xa4\x01"
+        expected = 420
+        actual = target.parse_dword(value, 2)
+        self.assertEqual(expected, actual)
+
+    def test_parse_dword_3_bytes_fails(self):
+        # a4 01 = 420
+        value = b"\xa4\x01\x03"
+        expected = 420
+        actual = target.parse_dword(value)
+        self.assertEqual(expected, actual)
+
     def test_signed_byte_int(self):
         expected = 7
         actual = target.parse_signed_byte(expected)
