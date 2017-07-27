@@ -137,7 +137,7 @@ class StrikeKit(object):
         return "\n".join(map(str, self.instruments))
 
     def csv(self):
-        return "\n".join(map(str, map(StrikeInstrument.csv, self.instruments)))
+        return "\n".join(map(str, map(StrikeKitVoice.csv, self.instruments)))
 
     @property
     def kit_settings(self):
@@ -186,11 +186,11 @@ class StrikeKit(object):
             start_index = x * constants.INSTRUMENT_SIZE
             end_index = start_index + constants.INSTRUMENT_SIZE
             raw_instrument = data[start_index:end_index]
-            instrument = StrikeInstrument(raw_instrument, samples=self.samples)
+            instrument = StrikeKitVoice(raw_instrument, samples=self.samples)
             result.append(instrument)
         self._instruments = result
 
-class StrikeInstrument(object):
+class StrikeKitVoice(object):
     """
         Instrument section
         80 bytes
@@ -295,18 +295,18 @@ class StrikeInstrument(object):
         inst_header = raw_header[0:8]
         # but make sure it's the right throwaway data.
         assert inst_header == constants.SENTINEL_INSTRUMENT_HEADER
-        self._trigger_spec = StrikeInstrumentTriggerSpec(raw_header[8:11])
+        self._trigger_spec = StrikeKitVoiceTriggerSpec(raw_header[8:11])
         raw_layers = data[constants.INSTRUMENT_HEADER_SIZE:constants.INSTRUMENT_HEADER_SIZE+(constants.INSTRUMENT_LAYER_SIZE*2)]
         assert len(raw_layers) == constants.INSTRUMENT_LAYER_SIZE*2
 
-        self._layer_a = StrikeInstrumentLayer(raw_data=raw_layers[0:constants.INSTRUMENT_LAYER_SIZE], samples=samples)
-        self._layer_b = StrikeInstrumentLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:], samples=samples)
+        self._layer_a = StrikeKitVoiceLayer(raw_data=raw_layers[0:constants.INSTRUMENT_LAYER_SIZE], samples=samples)
+        self._layer_b = StrikeKitVoiceLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:], samples=samples)
         raw_voice = data[constants.INSTRUMENT_HEADER_SIZE+(2*constants.INSTRUMENT_LAYER_SIZE):]
         assert len(raw_voice) == constants.INSTRUMENT_VOICE_SIZE
-        self.instrument_settings = StrikeInstrumentSettings(raw_data=raw_voice)
+        self.instrument_settings = StrikeVoiceSettings(raw_data=raw_voice)
 
 
-class StrikeInstrumentTriggerSpec(object):
+class StrikeKitVoiceTriggerSpec(object):
     def __init__(self, raw_data=None, *args, **kwargs):
         if raw_data:
             self._parse(raw_data)
@@ -322,7 +322,7 @@ class StrikeInstrumentTriggerSpec(object):
     def csv(self):
         return str(self)
 
-class StrikeInstrumentLayer(object):
+class StrikeKitVoiceLayer(object):
     def __init__(self, raw_data=None, samples=None, *args, **kwargs):
         if raw_data:
             self._parse(raw_data, samples)
@@ -386,7 +386,7 @@ FILTER:
         self.term_pad = data[17:20]
     
 
-class StrikeInstrumentSettings(object):
+class StrikeVoiceSettings(object):
     def __init__(self, *args, **kwargs):
         raw_data = kwargs.get("raw_data")
 
@@ -596,13 +596,25 @@ class StrikeFxSettings(object):
     def damping(self):
         return self._damping
 
+class StrikeInstrumentFile(object):
+    """
+        
+        
 
-class EnumType(object):
-    def __init__(self, in_dict):
-        self.__dict__ = in_dict
+        offset      12 (that's weird) byte header
+                    ------------------
+        0           4 byte 0x696e7374       - Begin "INST" header
+        4           4 byte 0x18000000       - 24 bytes of header data - dword
 
-    #def __getattribute__(self, attr):
-    #    if attr in self._data:
-    #        return self._data.get(attr)
-    #    else:
-    #        return super().__getattribute__(attr)
+
+        5           3 byte 0x00             - Padding
+        8           3 byte trigger spec     - (K|S|T|H|C|R)([1-4])(H|R|F|B|E|D)
+                                                Kick/Snare/Tom/Hat/Crash/Ride
+                                                1-4 for Toms, 1-3 Crash, 1 everything else
+                                                Head/Rim for pads
+                                                Foot/Edge/Bow for Hat
+                                                Edge/Bow for Crashes
+                                                D/B/E for Rides, not sure which is bow and bell    
+        11          1 byte                  - 0x20 (SPC) terminator ?     FF if not set    
+
+    """

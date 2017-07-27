@@ -24,6 +24,14 @@ class TestHelpers(unittest.TestCase):
         actual = target.parse_dword(value)
         self.assertEqual(expected, actual)
 
+    def test_parse_word_hexcases(self):
+        # this is read in as C002E... ?
+        raw = b"2e00000c"
+        trans = binascii.a2b_hex(raw)
+        import pdb; pdb.set_trace()
+        actual = target.parse_dword(trans)
+        self.assertEqual(786478, actual)
+
     def test_parse_dword_2_bytes(self):
         # a4 01 = 420
         value = b"\xa4\x01"
