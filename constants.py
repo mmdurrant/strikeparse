@@ -58,6 +58,31 @@ class FxType(ExtendedEnum):
     PingPong = 15
 
 
+class InstrumentType(ExtendedEnum):
+    Kick = 0,
+    Snare = 1,
+    Tom = 2,
+    HiHat = 3,
+    Crash = 4,
+    Ride = 5,
+    EKick = 7,
+    ESnare = 8,
+    ETom = 9,
+    CymbalsCrashes = 10,
+    PercEthnic = 11,
+    Unknown = 12,
+    PercOrchestral = 13,
+    Percussion = 14,
+    ClapsSfx = 18,
+    Melodic = 19,
+
+
+
+
+
+
+
+
 KIT_HEADER_SIZE = 52
 INSTRUMENT_SIZE = 80
 INSTRUMENT_COUNT = 24
@@ -177,3 +202,24 @@ FX_GROUP = [
 ]
 SENTINEL_INSTRUMENT_HEADER = b"instH\x00\x00\x00"
 
+
+
+"""
+Instrument Groups
+00 - Kick
+01 - Snare
+02 - Tom
+03 - HH
+04 - Crash
+05 - Ride
+07 - E Kick
+08 - E Snare
+09 - E Tom
+0a - Chinas/Splashes
+0b - Perc Ethnic
+0c - Unknown
+0d - Perc Orchestral
+0e - Percussion
+12 - Claps / SFX
+13 - Melodic
+"""
