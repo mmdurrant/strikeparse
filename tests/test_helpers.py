@@ -28,7 +28,6 @@ class TestHelpers(unittest.TestCase):
         # this is read in as C002E... ?
         raw = b"2e00000c"
         trans = binascii.a2b_hex(raw)
-        import pdb; pdb.set_trace()
         actual = target.parse_dword(trans)
         self.assertEqual(786478, actual)
 
