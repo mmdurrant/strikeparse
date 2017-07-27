@@ -177,7 +177,7 @@ class StrikeKit(object):
         self._kit_settings = StrikeKitSettings(raw_settings)
 
     def _parse_samples(self, data):
-        self._samples = StrikeSamples(data)
+        self._samples = StrikeKitVoiceInstruments(data)
 
     def _parse_instruments(self, data):
         result = []
@@ -303,7 +303,7 @@ class StrikeKitVoice(object):
         self._layer_b = StrikeKitVoiceLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:], samples=samples)
         raw_voice = data[constants.INSTRUMENT_HEADER_SIZE+(2*constants.INSTRUMENT_LAYER_SIZE):]
         assert len(raw_voice) == constants.INSTRUMENT_VOICE_SIZE
-        self.instrument_settings = StrikeVoiceSettings(raw_data=raw_voice)
+        self.instrument_settings = StrikeKitVoiceSettings(raw_data=raw_voice)
 
 
 class StrikeKitVoiceTriggerSpec(object):
@@ -386,7 +386,7 @@ FILTER:
         self.term_pad = data[17:20]
     
 
-class StrikeVoiceSettings(object):
+class StrikeKitVoiceSettings(object):
     def __init__(self, *args, **kwargs):
         raw_data = kwargs.get("raw_data")
 
@@ -429,7 +429,7 @@ MIDI Note Off:  {8}
         pad2 = data[15:]
 
 
-class StrikeSamples(object):
+class StrikeKitVoiceInstruments(object):
     def __init__(self, raw_data=None, *args, **kwargs):
         if raw_data:
             self._parse(raw_data)
@@ -596,11 +596,81 @@ class StrikeFxSettings(object):
     def damping(self):
         return self._damping
 
+
+class StrikeInstrument(object):
+    def __init__(self, *args, **kwargs):
+        self._instrument_settings = None
+        self._instruments = None
+        self._samples = None
+
+        raw_data = kwargs.get("raw_data") or args[0]
+        # parse raw data if it's there
+        if raw_data:
+            # Yea assignment by side effect
+            self._parse(raw_data)
+
+    def __str__(self):
+        return "\n".join(map(str, self.instruments))
+
+    def csv(self):
+        return "\n".join(map(str, map(StrikeKitVoice.csv, self.instruments)))
+
+    def _parse(self, data):
+        inst_header = data[0: 4]
+        header_length = helpers
+
+class StrikeInstrumentVelocityRange(object):
+    def __init__(self, *args, **kwargs):
+        # A velocity range includes min-max pairs and a list of samples.
+        pass
+
+
+class StrikeInstrumentSettings(object):
+    def __init__(self, *args, **kwargs):
+        self._level = 0
+        self._pan = 0
+        self._decay = 0
+        self._cutoff = 0
+        self._tune_semi = 0
+        self._tune_fine = 0
+
+        raw_data = kwargs.get("raw_data")
+        if raw_data:
+            self._parse(raw_data)
+        else:
+            pass
+
+    def _parse(self, data):
+        pass
+
+    @property
+    def level(self):
+        return self._level
+
+    @property
+    def pan(self):
+        return self._pan
+
+    @property
+    def decay(self):
+        return self._decay
+
+    @property
+    def cutoff(self):
+        return self._cutoff
+
+    @property
+    def tune_semitones(self):
+        return self._tune_semi
+
+    @property
+    def tune_fine(self):
+        return self._tune_fine
+
+
+
 class StrikeInstrumentFile(object):
     """
-        
-        
-
         offset      12 (that's weird) byte header
                     ------------------
         0           4 byte 0x696e7374       - Begin "INST" header
