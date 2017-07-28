@@ -35,11 +35,11 @@ class TestStrikeKit(unittest.TestCase):
         # we know this because of the dataset/filter above.
         assert str(kick) == "Kick1 Head"
 
-    def test_samples_not_none(self):
-        assert self.kit.samples
+    def test_instruments_not_none(self):
+        assert self.kit.instruments
 
-    def test_samples_sample_table_length_nonzero(self):
-        assert len(self.kit.samples.sample_table) > 0
+    def test_instruments_table_length_nonzero(self):
+        assert len(self.kit.instruments.instrument_table) > 0
 
     def test_instruments_have_layers(self):
         assert not any(x for x in self.kit.voices if x.layer_a is None)

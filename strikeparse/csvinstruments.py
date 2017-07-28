@@ -36,7 +36,6 @@ def main(*args):
         group_path = os.path.join(PARSE_DIR, inst_group)
 
         if os.path.isdir(group_path):
-            # import pdb; pdb.set_trace()
             for name in filter(lambda x: str(x).endswith("sin"), os.listdir(group_path)):
                 # All files in an instrument group are SIN files.
                 print("{0},{1}".format(inst_group,

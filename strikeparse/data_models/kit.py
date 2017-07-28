@@ -1,6 +1,9 @@
 from strikeparse import constants
 from strikeparse import helpers
 
+from strikeparse.data_models import StrikeKitVoice
+
+
 class StrikeKit(object):
     """
     File/Kit Header
@@ -124,7 +127,7 @@ class StrikeKit(object):
     def __init__(self, *args, **kwargs):
         self._kit_settings = None
         self._voices = None
-        self._samples = None
+        self._instruments = None
 
         raw_data = kwargs.get("raw_data") or args[0]
         # parse raw data if it's there
@@ -147,8 +150,8 @@ class StrikeKit(object):
         return self._voices
 
     @property
-    def samples(self):
-        return self._samples
+    def instruments(self):
+        return self._instruments
 
     def _parse_raw_kit(self, data):
         raw_header = data[0:constants.KIT_HEADER_SIZE]
@@ -176,7 +179,7 @@ class StrikeKit(object):
         self._kit_settings = StrikeKitSettings(raw_settings)
 
     def _parse_samples(self, data):
-        self._samples = StrikeKitVoiceInstruments(data)
+        self._instruments = StrikeKitVoiceInstruments(data)
 
     def _parse_kitvoices(self, data):
         result = []
@@ -185,7 +188,7 @@ class StrikeKit(object):
             start_index = x * constants.KITVOICE_SIZE
             end_index = start_index + constants.KITVOICE_SIZE
             raw_instrument = data[start_index:end_index]
-            instrument = StrikeKitVoice(raw_instrument, samples=self.samples)
+            instrument = StrikeKitVoice(raw_instrument, samples=self.instruments)
             result.append(instrument)
         self._voices = result
 

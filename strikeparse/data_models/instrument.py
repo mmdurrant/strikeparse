@@ -3,7 +3,7 @@ from strikeparse import helpers
 
 class StrikeInstrument(object):
     def __init__(self, *args, **kwargs):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         self._settings = None
         self._instruments = None
         self._samples = None
@@ -84,7 +84,7 @@ class StrikeInstrumentSettings(object):
         self._instrument_group = None
 
         data = kwargs.get("raw_data")
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         if data:
             self._parse(data)
         else:
