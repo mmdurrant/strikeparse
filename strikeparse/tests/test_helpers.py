@@ -97,6 +97,12 @@ class TestHelpers(unittest.TestCase):
     def test_parse_signed_byte_invalid_exception(self):
         self.assertRaises(TypeError, target.parse_signed_byte, ["H"])
 
+    def test_parse_signed_byte_negative_13(self):
+        value = b"F3"
+        expected = -13
+        actual = target.parse_signed_byte(value)
+        self.assertEqual(expected, actual)
+
     def test_pretty_pan_center(self):
         value = 0
         expected = "0"

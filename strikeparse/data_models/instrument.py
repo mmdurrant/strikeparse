@@ -41,7 +41,7 @@ class StrikeInstrument(object):
         header_size = helpers.parse_dword(data[4:8])
         offset += header_size
         # raw header data to pass to parse func
-        header_raw = helpers.parse_dword(data[8:8+header_size])
+        header_raw = data[8:8+header_size]
         self._settings = StrikeInstrumentSettings(raw_data=header_raw)
 
 class StrikeInstrumentVelocityRange(object):
@@ -91,16 +91,15 @@ class StrikeInstrumentSettings(object):
             # get values from kwargs
             pass
 
-
     def _parse(self, data):
         byte1 = data[0]
         self._instrument_group = data[1]
         flag1 = data[2]
         byte2 = data[3]
         bytepair1 = data[4:6]
-        level = data[6]
-        pan = helpers.parse_signed_byte(data[7])
-        decay = data[8]
+        self._level = data[6]
+        self._pan = helpers.parse_signed_byte(data[7])
+        self._decay = data[8]
         byte3 = data[9]
         byte4 = data[10]
         self._tune_semitone = helpers.parse_signed_byte(data[11])
@@ -112,8 +111,8 @@ class StrikeInstrumentSettings(object):
         self._vel_filter = helpers.parse_signed_byte(data[17])
         self._vel_volume = helpers.parse_signed_byte(data[18])
         byte5 = data[19]
-        terminator = data[20:23]
-        assert terminator == constants.SENTINEL_INSTRUMENT_HEADER_TERM
+        terminator = data[20:24]
+        assert terminator == constants.SENTINEL_INSTRUMENT_HEADER_TERM, "%s was not terminator" % terminator
 
     @property
     def level(self):
@@ -133,11 +132,32 @@ class StrikeInstrumentSettings(object):
 
     @property
     def tune_semitones(self):
-        return self._tune_semi
+        return self._tune_semitone
 
     @property
     def tune_fine(self):
         return self._tune_fine
+
+    @property
+    def filter_type(self):
+        return self._filter_type
+
+    @property
+    def velocity_decay(self):
+        return self._vel_decay
+
+    @property
+    def velocity_tune(self):
+        return self._vel_tune
+
+    @property
+    def velocity_filter(self):
+        return self._vel_filter
+
+    @property
+    def velocity_volume(self):
+        return self._vel_volume
+
 
 class StrikeInstrumentSampleData(object):
     def __init__(self, *args, **kwargs):
