@@ -25,13 +25,14 @@ class TestStrikeKit(unittest.TestCase):
         assert self.kit is not None
 
     def test_instruments_not_none(self):
-        assert self.kit.instruments is not None
+        assert self.kit.voices is not None
         
     def test_instruments_have_trigger_specs(self):
-        assert not any(x for x in self.kit.instruments if x.trigger_spec is None)
+        assert not any(x for x in self.kit.voices if x.trigger_spec is None)
 
     def test_trigger_specs_print(self):
-        kick = list(filter(lambda x: x.input_type == "Kick", [x.trigger_spec for x in self.kit.instruments]))[0]
+        kick = list(filter(lambda x: x.input_type == "Kick", [x.trigger_spec for x in self.kit.voices]))[0]
+        # we know this because of the dataset/filter above.
         assert str(kick) == "Kick1 Head"
 
     def test_samples_not_none(self):
@@ -41,7 +42,7 @@ class TestStrikeKit(unittest.TestCase):
         assert len(self.kit.samples.sample_table) > 0
 
     def test_instruments_have_layers(self):
-        assert not any(x for x in self.kit.instruments if x.layer_a is None)
+        assert not any(x for x in self.kit.voices if x.layer_a is None)
 
     def test_kit_str(self):
         assert str(self.kit)
@@ -50,7 +51,7 @@ class TestStrikeKit(unittest.TestCase):
         assert self.kit.csv()
 
     def test_instrument_setting_str(self):
-        for x in self.kit.instruments:
+        for x in self.kit.voices:
             print("%s\n\t%s\t%s" % (x.trigger_spec, x.layer_a.sample_name, x.layer_a.settings_str))
 
     def test_kit_settings_not_none(self):

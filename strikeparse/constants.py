@@ -10,6 +10,7 @@ class ExtendedEnum(Enum):
     def from_value(cls, val):
         return cls(val)
 
+
 @unique
 class ReverbType(ExtendedEnum):
     OFF = 255
@@ -58,7 +59,7 @@ class FxType(ExtendedEnum):
     PingPong = 15
 
 
-class InstrumentType(ExtendedEnum):
+class InstrumentGroup(ExtendedEnum):
     Kick = 0,
     Snare = 1,
     Tom = 2,
@@ -77,10 +78,10 @@ class InstrumentType(ExtendedEnum):
     Melodic = 19,
 
 
-
-
-
-
+class InstrumentType(ExtendedEnum):
+    Single = 0,
+    HHCymbal = 1,
+    HHPedal = 2
 
 
 KIT_HEADER_SIZE = 52
@@ -201,7 +202,7 @@ FX_GROUP = [
 
 ]
 SENTINEL_INSTRUMENT_HEADER = b"instH\x00\x00\x00"
-
+SENTINEL_INSTRUMENT_HEADER_TERM = b'\x7f\x00\x00\x00'
 
 
 """
