@@ -1,6 +1,5 @@
-from strikeparse import constants
+from strikeparse import constants, helpers, helpers, helpers
 from strikeparse import helpers
-
 
 class StrikeKit(object):
     """
@@ -124,7 +123,7 @@ class StrikeKit(object):
     """
     def __init__(self, *args, **kwargs):
         self._kit_settings = None
-        self._instruments = None
+        self._voices = None
         self._samples = None
 
         raw_data = kwargs.get("raw_data") or args[0]
@@ -134,18 +133,18 @@ class StrikeKit(object):
             self._parse_raw_kit(raw_data)
 
     def __str__(self):
-        return "\n".join(map(str, self.instruments))
+        return "\n".join(map(str, self.voices))
 
     def csv(self):
-        return "\n".join(map(str, map(StrikeKitVoice.csv, self.instruments)))
+        return "\n".join(map(str, map(StrikeKitVoice.csv, self.voices)))
 
     @property
     def kit_settings(self):
         return self._kit_settings
 
     @property
-    def instruments(self):
-        return self._instruments
+    def voices(self):
+        return self._voices
 
     @property
     def samples(self):
@@ -155,13 +154,13 @@ class StrikeKit(object):
         raw_header = data[0:constants.KIT_HEADER_SIZE]
         self._parse_header(raw_header)
         inst_begin = constants.KIT_HEADER_SIZE
-        inst_end = constants.KIT_HEADER_SIZE + (constants.INSTRUMENT_COUNT * constants.INSTRUMENT_SIZE)
-        raw_instruments = data[inst_begin:inst_end]
+        inst_end = constants.KIT_HEADER_SIZE + (constants.KITVOICE_COUNT * constants.KITVOICE_SIZE)
+        raw_voices = data[inst_begin:inst_end]
         raw_sampledata = data[inst_end:]
 
         # Samples have to be parsed before instruments so we know who uses what.
         self._parse_samples(raw_sampledata)
-        self._parse_instruments(raw_instruments)
+        self._parse_kitvoices(raw_voices)
 
     def _parse_header(self, data):
         """
@@ -179,16 +178,16 @@ class StrikeKit(object):
     def _parse_samples(self, data):
         self._samples = StrikeKitVoiceInstruments(data)
 
-    def _parse_instruments(self, data):
+    def _parse_kitvoices(self, data):
         result = []
         
-        for x in range(0, constants.INSTRUMENT_COUNT):
-            start_index = x * constants.INSTRUMENT_SIZE
-            end_index = start_index + constants.INSTRUMENT_SIZE
+        for x in range(0, constants.KITVOICE_COUNT):
+            start_index = x * constants.KITVOICE_SIZE
+            end_index = start_index + constants.KITVOICE_SIZE
             raw_instrument = data[start_index:end_index]
             instrument = StrikeKitVoice(raw_instrument, samples=self.samples)
             result.append(instrument)
-        self._instruments = result
+        self._voices = result
 
 class StrikeKitVoice(object):
     """
@@ -365,7 +364,7 @@ FILTER:
         # 0-47 if there's a sample. FF if not
         self._sample_index = helpers.parse_signed_byte(data[0])
         if self._sample_index >= 0 and self._sample_index != 255:
-            self._sample_name = samples.get_sample_by_index(self._sample_index)
+            self._sample_name = samples.get_instrument_by_index(self._sample_index)
         else:
             self._sample_name = ""
         # mystery pad byte.
@@ -435,16 +434,16 @@ class StrikeKitVoiceInstruments(object):
             self._parse(raw_data)
 
     @property
-    def sample_table(self):
-        return self._sample_table
+    def instrument_table(self):
+        return self._instrument_table
 
-    def get_sample_by_index(self, index):
+    def get_instrument_by_index(self, index):
 
-        return self._sample_table[index]
+        return self._instrument_table[index]
 
     def _parse(self, data):
         """
-        Sample table is at the end of file. This makes things a little easier
+        Instrument table is at the end of file. This makes things a little easier
         starts with a "str" type indicator, followed by space.
         
         The following 4 bytes are a 32-bit integer with the bytes stored in reverse order
@@ -461,7 +460,7 @@ class StrikeKitVoiceInstruments(object):
         table_size = helpers.parse_dword(size_bytes)
         raw_samples = data[8:]
         split_samples = map(lambda x:x.decode("utf-8"), raw_samples.split(b"\0"))
-        self._sample_table = list([str(x) for x in split_samples if x != ""])
+        self._instrument_table = list([str(x) for x in split_samples if x != ""])
 
 
 class StrikeKitSettings(object):
@@ -595,96 +594,3 @@ class StrikeFxSettings(object):
     @property
     def damping(self):
         return self._damping
-
-
-class StrikeInstrument(object):
-    def __init__(self, *args, **kwargs):
-        self._instrument_settings = None
-        self._instruments = None
-        self._samples = None
-
-        raw_data = kwargs.get("raw_data") or args[0]
-        # parse raw data if it's there
-        if raw_data:
-            # Yea assignment by side effect
-            self._parse(raw_data)
-
-    def __str__(self):
-        return "\n".join(map(str, self.instruments))
-
-    def csv(self):
-        return "\n".join(map(str, map(StrikeKitVoice.csv, self.instruments)))
-
-    def _parse(self, data):
-        inst_header = data[0: 4]
-        header_length = helpers
-
-class StrikeInstrumentVelocityRange(object):
-    def __init__(self, *args, **kwargs):
-        # A velocity range includes min-max pairs and a list of samples.
-        pass
-
-
-class StrikeInstrumentSettings(object):
-    def __init__(self, *args, **kwargs):
-        self._level = 0
-        self._pan = 0
-        self._decay = 0
-        self._cutoff = 0
-        self._tune_semi = 0
-        self._tune_fine = 0
-
-        raw_data = kwargs.get("raw_data")
-        if raw_data:
-            self._parse(raw_data)
-        else:
-            pass
-
-    def _parse(self, data):
-        pass
-
-    @property
-    def level(self):
-        return self._level
-
-    @property
-    def pan(self):
-        return self._pan
-
-    @property
-    def decay(self):
-        return self._decay
-
-    @property
-    def cutoff(self):
-        return self._cutoff
-
-    @property
-    def tune_semitones(self):
-        return self._tune_semi
-
-    @property
-    def tune_fine(self):
-        return self._tune_fine
-
-
-
-class StrikeInstrumentFile(object):
-    """
-        offset      12 (that's weird) byte header
-                    ------------------
-        0           4 byte 0x696e7374       - Begin "INST" header
-        4           4 byte 0x18000000       - 24 bytes of header data - dword
-
-
-        5           3 byte 0x00             - Padding
-        8           3 byte trigger spec     - (K|S|T|H|C|R)([1-4])(H|R|F|B|E|D)
-                                                Kick/Snare/Tom/Hat/Crash/Ride
-                                                1-4 for Toms, 1-3 Crash, 1 everything else
-                                                Head/Rim for pads
-                                                Foot/Edge/Bow for Hat
-                                                Edge/Bow for Crashes
-                                                D/B/E for Rides, not sure which is bow and bell    
-        11          1 byte                  - 0x20 (SPC) terminator ?     FF if not set    
-
-    """
