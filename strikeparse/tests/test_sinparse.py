@@ -24,7 +24,6 @@ class TestStrikeInstrument(unittest.TestCase):
 
     def test_settings_parse(self):
         actual = StrikeInstrumentSettings(raw_data=self.settings_data)
-        # 75 0 99 99 0 0 0 0 0 0 83
         self.assertIsNotNone(actual)
         self.assertEqual(29, actual.level)
         self.assertEqual(-13, actual.pan)
