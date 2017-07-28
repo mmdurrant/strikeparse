@@ -1,3 +1,6 @@
+from strikeparse import constants
+from strikeparse import helpers
+
 class StrikeKitVoice(object):
     """
         Instrument section
