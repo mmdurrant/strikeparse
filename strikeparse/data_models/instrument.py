@@ -1,6 +1,8 @@
 from strikeparse import constants
 from strikeparse import helpers
 
+from sortedcontainers import SortedList
+
 class StrikeInstrument(object):
     def __init__(self, *args, **kwargs):
         #import pdb; pdb.set_trace()
@@ -49,17 +51,53 @@ class StrikeInstrument(object):
         # msmp length
         msmp_length = helpers.parse_dword(data[36:40])
         cycle_mode = data[40]
+        assert cycle_mode in (0, 1)
         byte0 = data[41]
         sample_count = data[42]
         flag0 = data[43]
-        sample_size = msmp_length / sample_count
+        # This changes depending on the type of file we're reading.
+        # This should fix that.
+        sample_size = (msmp_length - 4) / sample_count
+        # make sure it's a normal sample size
+        assert sample_size in (28, 30)
+        raw_ranges = data[44:44+(sample_size*sample_count)]
+        
+        # Parse the sample data out.
+        velocity_samples = []
+        read_offset = 0
+        for i in range(0, sample_count - 1):
+            raw_sample = raw_ranges[0:sample_size]
+            vel_sample = StrikeInstrumentVelocitySample(raw_sample)
 
 
-class StrikeInstrumentVelocityRange(object):
+
+class StrikeInstrumentVelocitySample(object):
     def __init__(self, *args, **kwargs):
         # A velocity range includes min-max pairs and a list of samples.
-        self._lbound = 0
-        self._ubound = 127
+        self._vel_lbound = 0
+        self._vel_ubound = 127
+        self._range_samples = []
+        self._sample_index = -1
+        self._sample_order = -1
+        self._volume_pad = 64
+
+        raw_data = self.kwargs.get("raw_data")
+        if raw_data:
+            self._parse(raw_data)
+        else:
+            pass
+
+        def _parse(self, data):
+            self._sample_index = helpers.parse_signed_byte(data[0:2])
+            byte1 = helpers.parse_signed_byte(data[2])
+            self._vel_lbound = data[3]
+            self._vel_ubound = data[4]
+            weird_bytes = data[5:7]
+            self._sample_order = data[7]
+            weird_zeroes = data[8:18]
+            self._volume_pad = helpers.parse_signed_byte(data[18:22])
+            more_zeroes = data[22:24]
+            terminator = data[24:28]
 
 
 class StrikeHiHatCymbalSettings(object):
@@ -169,35 +207,3 @@ class StrikeInstrumentSettings(object):
     def velocity_volume(self):
         return self._vel_volume
 
-
-class StrikeInstrumentSampleData(object):
-    def __init__(self, *args, **kwargs):
-        if "raw_data" in kwargs:
-            raw_data = kwargs.get("raw_data")
-            self._parse(raw_data)
-        else:
-            #
-            pass
-
-    def _parse(self, data):
-        pass
-
-class StrikeInstrumentFile(object):
-    """
-        offset      12 (that's weird) byte header
-                    ------------------
-        0           4 byte 0x696e7374       - Begin "INST" header
-        4           4 byte 0x18000000       - 24 bytes of header data - dword
-
-
-        5           3 byte 0x00             - Padding
-        8           3 byte trigger spec     - (K|S|T|H|C|R)([1-4])(H|R|F|B|E|D)
-                                                Kick/Snare/Tom/Hat/Crash/Ride
-                                                1-4 for Toms, 1-3 Crash, 1 everything else
-                                                Head/Rim for pads
-                                                Foot/Edge/Bow for Hat
-                                                Edge/Bow for Crashes
-                                                D/B/E for Rides, not sure which is bow and bell    
-        11          1 byte                  - 0x20 (SPC) terminator ?     FF if not set    
-
-    """

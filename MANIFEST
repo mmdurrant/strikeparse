@@ -2,7 +2,10 @@
 README.txt
 setup.py
 strikeparse\__init__.py
+strikeparse\__version__.py
 strikeparse\constants.py
-strikeparse\data_models.py
+strikeparse\csvinstruments.py
+strikeparse\csvkits.py
+strikeparse\deploy.py
 strikeparse\helpers.py
 strikeparse\kitparse.py
