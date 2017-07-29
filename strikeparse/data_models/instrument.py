@@ -43,6 +43,17 @@ class StrikeInstrument(object):
         # raw header data to pass to parse func
         header_raw = data[8:8+header_size]
         self._settings = StrikeInstrumentSettings(raw_data=header_raw)
+        # msmp header
+        msmp_header = str(data[32:36], "ascii")
+        assert msmp_header == constants.SENTINEL_INSTRUMENT_MSMP_HEADER
+        # msmp length
+        msmp_length = helpers.parse_dword(data[36:40])
+        cycle_mode = data[40]
+        byte0 = data[41]
+        sample_count = data[42]
+        flag0 = data[43]
+        sample_size = msmp_length / sample_count
+
 
 class StrikeInstrumentVelocityRange(object):
     def __init__(self, *args, **kwargs):

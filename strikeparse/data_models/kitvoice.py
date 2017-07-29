@@ -103,13 +103,13 @@ class StrikeKitVoice(object):
     def _parse(self, data, samples=[]):
         raw_header = data[0:constants.INSTRUMENT_HEADER_SIZE]
         # throwaway data.
-        inst_header = raw_header[0:8]
+        inst_header = raw_header[0:4]
         # but make sure it's the right throwaway data.
         assert inst_header == constants.SENTINEL_INSTRUMENT_HEADER
+        header_size = helpers.parse_dword(data[4:8])
         self._trigger_spec = StrikeKitVoiceTriggerSpec(raw_header[8:11])
         raw_layers = data[constants.INSTRUMENT_HEADER_SIZE:constants.INSTRUMENT_HEADER_SIZE+(constants.INSTRUMENT_LAYER_SIZE*2)]
         assert len(raw_layers) == constants.INSTRUMENT_LAYER_SIZE*2
-
         self._layer_a = StrikeKitVoiceLayer(raw_data=raw_layers[0:constants.INSTRUMENT_LAYER_SIZE], samples=samples)
         self._layer_b = StrikeKitVoiceLayer(raw_data=raw_layers[constants.INSTRUMENT_LAYER_SIZE:], samples=samples)
         raw_voice = data[constants.INSTRUMENT_HEADER_SIZE+(2*constants.INSTRUMENT_LAYER_SIZE):]
