@@ -42,6 +42,10 @@ class TestStrikeInstrument(unittest.TestCase):
 
     def test_parse_single_sample_record(self):
         actual = StrikeInstrumentVelocitySample(self.single_sample_record)
-        self.assertNotNone(actual)
-        self.assertEqual(42, actual.sample_id)
+        self.assertIsNotNone(actual)
+        self.assertEqual(42, actual.sample_index)
+        self.assertEqual(121, actual.vel_lbound)
+        self.assertEqual(127, actual.vel_ubound)
+        self.assertEqual(6, actual.sample_order)
+        self.assertEqual(64, actual.volume_pad)
 

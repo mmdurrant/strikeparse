@@ -73,7 +73,7 @@ class StrikeInstrument(object):
 
 
 class StrikeInstrumentVelocitySample(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, raw_data=None, *args, **kwargs):
         # A velocity range includes min-max pairs and a list of samples.
         self._vel_lbound = 0
         self._vel_ubound = 127
@@ -82,23 +82,43 @@ class StrikeInstrumentVelocitySample(object):
         self._sample_order = -1
         self._volume_pad = 64
 
-        raw_data = kwargs.get("raw_data")
+        raw_data = raw_data
         if raw_data:
             self._parse(raw_data)
         else:
             pass
 
-        def _parse(self, data):
-            self._sample_index = helpers.parse_signed_byte(data[0:2])
-            byte1 = helpers.parse_signed_byte(data[2])
-            self._vel_lbound = data[3]
-            self._vel_ubound = data[4]
-            weird_bytes = data[5:7]
-            self._sample_order = data[7]
-            weird_zeroes = data[8:18]
-            self._volume_pad = helpers.parse_signed_byte(data[18:22])
-            more_zeroes = data[22:24]
-            terminator = data[24:28]
+    @property
+    def sample_index(self):
+        return self._sample_index
+
+    @property
+    def vel_lbound(self):
+        return self._vel_lbound
+
+    @property
+    def vel_ubound(self):
+        return self._vel_ubound
+
+    @property
+    def sample_order(self):
+        return self._sample_order
+
+    @property
+    def volume_pad(self):
+        return self._volume_pad
+
+    def _parse(self, data):
+        self._sample_index = helpers.parse_dword(data[0:2], 2)
+        byte1 = data[2]
+        self._vel_lbound = data[3]
+        self._vel_ubound = data[4]
+        weird_bytes = data[5:7]
+        self._sample_order = data[7]
+        weird_zeroes = data[8:18]
+        self._volume_pad = helpers.parse_dword(data[18:22])
+        more_zeroes = data[22:24]
+        terminator = data[24:28]
 
 
 class StrikeHiHatCymbalSettings(object):
