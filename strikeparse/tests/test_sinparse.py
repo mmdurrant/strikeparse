@@ -6,12 +6,13 @@ from strikeparse import helpers
 
 from strikeparse.data_models import StrikeInstrument
 from strikeparse.data_models import StrikeInstrumentSettings
+from strikeparse.data_models import StrikeInstrumentVelocitySample
 
 class TestStrikeInstrument(unittest.TestCase):
     def setUp(self):
         single_file = "%s\\%s" % (os.path.dirname(os.path.realpath(__file__)), "single.sin")
         self.settings_data = b'\x00\x03\x01\x00\x00\x00\x1d\xf3\x0a\x00\x00\x0c\xe8\x2a\x00\xe0\xe0\xed\x41\x00\x7f\x00\x00\x00'
-        self.sample_record = b'\x00\x00\x63\x79\x7f\x3c\x3c\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x3c\x00\x00\x00'
+        self.single_sample_record = b'\x00\x00\x63\x79\x7f\x3c\x3c\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x3c\x00\x00\x00'
 
         with open(single_file, "rb") as f:
             raw_data = f.read()
@@ -38,4 +39,7 @@ class TestStrikeInstrument(unittest.TestCase):
         self.assertEqual(-19, actual.velocity_filter)
         self.assertEqual(-32, actual.velocity_decay)
         self.assertEqual(-32, actual.velocity_tune)
+
+    def test_parse_single_sample_record(self):
+        actual = StrikeInstrumentVelocitySample(self.single_sample_record)
 

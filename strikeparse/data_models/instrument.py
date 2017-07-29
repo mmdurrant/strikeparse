@@ -57,10 +57,11 @@ class StrikeInstrument(object):
         flag0 = data[43]
         # This changes depending on the type of file we're reading.
         # This should fix that.
-        sample_size = (msmp_length - 4) / sample_count
+        sample_size = int((msmp_length - 4) / sample_count)
         # make sure it's a normal sample size
         assert sample_size in (28, 30)
-        raw_ranges = data[44:44+(sample_size*sample_count)]
+        range_upper = int(44 + (sample_size * sample_count))
+        raw_ranges = data[44:range_upper]
         
         # Parse the sample data out.
         velocity_samples = []
@@ -81,7 +82,7 @@ class StrikeInstrumentVelocitySample(object):
         self._sample_order = -1
         self._volume_pad = 64
 
-        raw_data = self.kwargs.get("raw_data")
+        raw_data = kwargs.get("raw_data")
         if raw_data:
             self._parse(raw_data)
         else:
